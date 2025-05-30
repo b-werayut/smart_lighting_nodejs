@@ -4,6 +4,7 @@ const morgan = require('morgan')
 const { readdirSync } = require('fs')
 
 app.use(morgan('dev'))
+app.use(express.json())
 
 readdirSync("./Routes")
 .map((c)=> app.use('/api', require(`./Routes/${c}`)))

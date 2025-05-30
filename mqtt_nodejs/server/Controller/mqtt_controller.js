@@ -5,42 +5,45 @@ const processedMacs = new Set()
 
 exports.turnOnLight = async (req, res) => {
     try {
-        const topic = 'mesh_data/toDevice/56'
+        const topic = 'mesh_data/toDevice/56';
         const message = JSON.stringify({
             method: 'control_lighting',
             params: {
                 relay: 'ON',
-                workmode: 'SCHEDULE',
+                workmode: 'MANUAL',
                 lightmode: 'PWM',
                 pwm1: 0,
                 pwm2: 40,
             },
-        })
+        });
 
         if (!client.connected) {
-            console.log('MQTT not connected')
-            return res.status(503).send('MQTT not connected')
+            console.log('MQTT not connected');
+            return res.status(503).send('MQTT not connected');
         }
 
-        client.publish(topic, message, { qos: 1, retain: true }, (err) => {
-            if (err) {
-                console.error('❌ Publish error:', err.message)
-                if (!res.headersSent) res.status(500).send('Publish failed')
-            } else {
-                console.log(`📤 Sent to topic "${topic}": ${message}`)
-                if (!res.headersSent) res.send(`📤 Sent to topic "${topic}": ${message}`)
-            }
-        })
+        setTimeout(() => {
+            client.publish(topic, message, { qos: 1, retain: true }, (err) => {
+                if (err) {
+                    console.error('❌ Publish error:', err.message);
+                    if (!res.headersSent) res.status(500).send('Publish failed');
+                } else {
+                    console.log(`📤 Sent to topic "${topic}": ${message}`);
+                    if (!res.headersSent) res.send(`📤 Sent to topic "${topic}": ${message}`);
+                }
+            });
+        }, 2000);
 
     } catch (err) {
-        console.error('❌ Server Error:', err)
-        if (!res.headersSent) res.status(500).json({ msg: 'Server Error' })
+        console.error('❌ Server Error:', err);
+        if (!res.headersSent) res.status(500).json({ msg: 'Server Error' });
     }
-}
+};
+
 
 exports.turnOffLight = async (req, res) => {
     try {
-        const topic = 'mesh_data/toDevice/56'
+        const topic = 'mesh_data/toDevice/56';
         const message = JSON.stringify({
             method: 'control_lighting',
             params: {
@@ -50,28 +53,31 @@ exports.turnOffLight = async (req, res) => {
                 pwm1: 20,
                 pwm2: 0,
             },
-        })
+        });
 
         if (!client.connected) {
-            console.log('MQTT not connected')
-            return res.status(503).send('MQTT not connected')
+            console.log('MQTT not connected');
+            return res.status(503).send('MQTT not connected');
         }
 
-        client.publish(topic, message, { qos: 1, retain: true }, (err) => {
-            if (err) {
-                console.error('❌ Publish error:', err.message)
-                if (!res.headersSent) res.status(500).send('Publish failed')
-            } else {
-                console.log(`📤 Sent to topic "${topic}": ${message}`)
-                if (!res.headersSent) res.send(`📤 Sent to topic "${topic}": ${message}`)
-            }
-        })
+        setTimeout(() => {
+            client.publish(topic, message, { qos: 1, retain: true }, (err) => {
+                if (err) {
+                    console.error('❌ Publish error:', err.message);
+                    if (!res.headersSent) res.status(500).send('Publish failed');
+                } else {
+                    console.log(`📤 Sent to topic "${topic}": ${message}`);
+                    if (!res.headersSent) res.send(`📤 Sent to topic "${topic}": ${message}`);
+                }
+            });
+        }, 2000);
 
     } catch (err) {
-        console.error('❌ Server Error:', err)
-        if (!res.headersSent) res.status(500).json({ msg: 'Server Error' })
+        console.error('❌ Server Error:', err);
+        if (!res.headersSent) res.status(500).json({ msg: 'Server Error' });
     }
-}
+};
+
 
 exports.deviceResp = async (req, res) => {
     try {
@@ -158,7 +164,9 @@ exports.getMidDatas = async (req, res) => {
     try {
         if (!client.connected) return res.status(500).send('MQTT not connected')
 
-        const topic = 'mesh_data/toCloud/58/+'
+        // const topic = 'mesh_data/toCloud/58/+'
+        const { topic } = req.body
+        console.log('topic:::::', topic)
         const meshNameraw = topic.split('/')
         const meshName = meshNameraw[2]
         let responded = false
@@ -178,7 +186,7 @@ exports.getMidDatas = async (req, res) => {
 
             const result = await insertDatas(datastest)
             console.log("Insert Datastest to DB::", result)
-            return res.send(`Insert Datastest to DB: ${result}`)
+            return res.json({ message: 'Insert Datastest to DB', data: result });
         }
 
         client.subscribe(topic, async (err) => {
