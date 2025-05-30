@@ -1,0 +1,286 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model TBackUpLampUpdate {
+  XVLmpCode      String?   @db.NVarChar(20)
+  XTStaUpdate    DateTime? @db.DateTime
+  XIStaRelay     Int?
+  XIStaPWM1      Int?
+  XIStaPWM2      Int?
+  XIStaSignal    Int?
+  XFStaCurrent   Int?
+  XIStaAmLight   Int?
+  XIStaMode      Int?
+  XVSchStart1    String?   @db.NVarChar(5)
+  XVSchDuration1 String?   @db.NVarChar(5)
+  XISchPWM11     Int?
+  XISchPWM21     Int?
+  XVSchStart2    String?   @db.NVarChar(5)
+  XVSchDuration2 String?   @db.NVarChar(5)
+  XISchPWM12     Int?
+  XISchPWM22     Int?
+  XVSchStart3    String?   @db.NVarChar(5)
+  XVSchDuration3 String?   @db.NVarChar(5)
+  XISchPWM13     Int?
+  XISchPWM23     Int?
+  XVSchStart4    String?   @db.NVarChar(5)
+  XVSchDuration4 String?   @db.NVarChar(5)
+  XISchPWM14     Int?
+  XISchPWM24     Int?
+  XVSchStart5    String?   @db.NVarChar(5)
+  XVSchDuration5 String?   @db.NVarChar(5)
+  XISchPWM15     Int?
+  XISchPWM25     Int?
+
+  @@ignore
+}
+
+model TDocTJob {
+  XVJobDocNo       String    @id(map: "PK_TDocTJob") @db.NVarChar(20)
+  XDJobDocDate     DateTime? @db.Date
+  XVJobDocStatus   String?   @db.NVarChar(1)
+  XVCstCode        String?   @db.NVarChar(20)
+  XVPrjCode        String?   @db.NVarChar(20)
+  XVCtlCode        String?   @db.NVarChar(20)
+  XVLmpCode        String?   @db.NVarChar(20)
+  XVJobProblem     String?   @db.NVarChar(500)
+  XVJobLocation    String?   @db.NVarChar(100)
+  XTJobProblemTime DateTime? @db.DateTime
+  XVJobResolve     String?   @db.NVarChar(500)
+  XTJobResolveTime DateTime? @db.DateTime
+  XBJobIsComplete  Boolean?
+  XVWhoCreate      String?   @db.NVarChar(100)
+  XVWhoEdit        String?   @db.NVarChar(100)
+  XTWhenCreate     DateTime? @db.DateTime
+  XTWhenEdit       DateTime? @db.DateTime
+}
+
+model TMstMController {
+  XVCtlCode        String    @id(map: "PK_TMstMController") @db.NVarChar(20)
+  XVCtlName        String?   @db.NVarChar(100)
+  XVCtlDescription String?   @db.NVarChar(300)
+  XVCtlSN          String?   @db.NVarChar(50)
+  XVPrjCode        String    @db.NVarChar(20)
+  XVCtlLat         String?   @db.NVarChar(20)
+  XVCtlLong        String?   @db.NVarChar(20)
+  XVCtlPhone       String?   @db.NVarChar(30)
+  XICtlLampQty     Int?
+  XFCtlAmpMin      Float?
+  XFCtlAmpMax      Float?
+  XVBoxNo          String?   @db.NVarChar(100)
+  XVBoxKmFrom      String?   @db.NVarChar(50)
+  XVBoxKmTo        String?   @db.NVarChar(50)
+  XVWhoCreate      String?   @db.NVarChar(100)
+  XVWhoEdit        String?   @db.NVarChar(100)
+  XTWhenCreate     DateTime? @db.DateTime
+  XTWhenEdit       DateTime? @db.DateTime
+
+  @@index([XVPrjCode], map: "IX_TMstMController_XVPrjCode")
+}
+
+model TMstMCustomer {
+  XVCstCode    String    @id(map: "PK_TMstMCustomer") @db.NVarChar(20)
+  XVCstName    String?   @db.NVarChar(100)
+  XVCstAddress String?   @db.NVarChar(500)
+  XVCstPhone   String?   @db.NVarChar(50)
+  XVCstEmail   String?   @db.NVarChar(50)
+  XVWhoCreate  String?   @db.NVarChar(100)
+  XVWhoEdit    String?   @db.NVarChar(100)
+  XTWhenCreate DateTime? @db.DateTime
+  XTWhenEdit   DateTime? @db.DateTime
+}
+
+model TMstMLamp {
+  XVLmpCode        String    @id(map: "PK_TMstMLamp") @db.NVarChar(20)
+  XVLmpName        String?   @db.NVarChar(100)
+  XVLmpDescription String?   @db.NVarChar(300)
+  XVLmpSN          String?   @db.NVarChar(50)
+  XVCtlCode        String    @db.NVarChar(20)
+  XVLmpLat         String?   @db.NVarChar(20)
+  XVLmpLong        String?   @db.NVarChar(20)
+  XBLmpIsWarning   Boolean?
+  XVWhoCreate      String?   @db.NVarChar(100)
+  XVWhoEdit        String?   @db.NVarChar(100)
+  XTWhenCreate     DateTime? @db.DateTime
+  XTWhenEdit       DateTime? @db.DateTime
+
+  @@index([XVCtlCode], map: "IX_TMstMLamp_XVCtlCode")
+}
+
+model TMstMProject {
+  XVPrjCode       String    @id(map: "PK_TMstMProject") @db.NVarChar(20)
+  XVPrjName       String?   @db.NVarChar(200)
+  XVPrjAddress    String?   @db.NVarChar(500)
+  XVPrjType       String?   @db.NVarChar(1)
+  XVCstCode       String    @db.NVarChar(20)
+  XVSdtCode       String    @db.NVarChar(6)
+  XVPrjLineToken1 String?   @db.NVarChar(200)
+  XVPrjLineToken2 String?   @db.NVarChar(200)
+  XVWhoCreate     String?   @db.NVarChar(100)
+  XVWhoEdit       String?   @db.NVarChar(100)
+  XTWhenCreate    DateTime? @db.DateTime
+  XTWhenEdit      DateTime? @db.DateTime
+  XVPNotify       DateTime? @db.DateTime
+
+  @@index([XVCstCode], map: "IX_TMstMProject_XVCstCode")
+  @@index([XVSdtCode], map: "IX_TMstMProject_XVSdtCode")
+}
+
+model TMstMUser {
+  XVUsrCode    String    @id(map: "PK_TMstMUser") @db.NVarChar(20)
+  XVUsrPwd     String?   @db.NVarChar(100)
+  XVUsrName    String?   @db.NVarChar(100)
+  XVCstCode    String?   @db.NVarChar(20)
+  XVCstRol     String?   @db.NVarChar(1)
+  XVWhoCreate  String?   @db.NVarChar(100)
+  XVWhoEdit    String?   @db.NVarChar(100)
+  XTWhenCreate DateTime? @db.DateTime
+  XTWhenEdit   DateTime? @db.DateTime
+
+  @@index([XVCstCode], map: "IX_TMstMUser_XVCstCode")
+}
+
+model TSysSConfig {
+  XVSysCode  String  @id(map: "PK_TSysSConfig") @db.NVarChar(3)
+  XVSysName  String? @db.NVarChar(100)
+  XVSysValue String? @db.NVarChar(100)
+}
+
+model TSysSDistrict {
+  XVDstCode              String  @id(map: "PK_TSysSDistrict") @db.NVarChar(5)
+  XVDstName              String? @db.NVarChar(100)
+  XVDstNameEng           String? @db.NVarChar(100)
+  XVDstNameWithPrefix    String? @db.NVarChar(100)
+  XVDstNameEngWithPrefix String? @db.NVarChar(100)
+  XVPvnCode              String  @db.NVarChar(5)
+
+  @@index([XVPvnCode], map: "IX_TSysSDistrict_XVPvnCode")
+}
+
+model TSysSProvince {
+  XVPvnCode    String  @id(map: "PK_TSysSProvince") @db.NVarChar(5)
+  XVPvnName    String? @db.NVarChar(100)
+  XVPvnNameEng String? @db.NVarChar(100)
+}
+
+model TSysSSubDistrict {
+  XVSdtCode              String  @id(map: "PK_TSysSSubDistrict") @db.NVarChar(6)
+  XVSdtName              String? @db.NVarChar(100)
+  XVSdtNameEng           String? @db.NVarChar(100)
+  XVSdtNameWithPrefix    String? @db.NVarChar(100)
+  XVSdtNameEngWithPrefix String? @db.NVarChar(100)
+  XVSdtPostCode          String? @db.NVarChar(5)
+  XVDstCode              String  @db.NVarChar(5)
+
+  @@index([XVDstCode], map: "IX_TSysSSubDistrict_XVDstCode")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model TSysSVersion {
+  XISysVersion1 Int?
+  XISysVersion2 Int?
+  XISysVersion3 Int?
+  XISysVersion4 Int?
+
+  @@ignore
+}
+
+model TSysTCheckErrorForce {
+  XVLmpCode    String   @id(map: "PK_TSysTCheckErrorForce") @db.NVarChar(20)
+  XBLmpIsError Boolean?
+}
+
+model TTrnTCheckError {
+  XVLmpCode      String    @id(map: "PK_TTrnTCheckError") @db.NVarChar(20)
+  XBLmpIsError   Boolean?
+  XTLmpLastError DateTime? @db.DateTime
+}
+
+model TTrnTControllerStatus {
+  XVCtlSerial    String    @db.NVarChar(20)
+  XTCstDate      DateTime  @default(now(), map: "DF_TTrnTControllerStatus_XTCstDate") @db.DateTime
+  XFCstVoltage   Float?
+  XFCstCurrent   Float?
+  XFCstPower     Float?
+  XFCstEnergy    Float?
+  XFCstFrequency Float?
+  XTCstPrevTime  DateTime? @db.DateTime
+  XICstWaitTime  BigInt?
+
+  @@id([XVCtlSerial, XTCstDate], map: "PK_TTrnTControllerStatus")
+}
+
+model TTrnTLampUpdate {
+  XIID           BigInt    @id(map: "PK_TTrnTLampUpdate_1") @default(autoincrement())
+  XVLmpCode      String?   @db.NVarChar(20)
+  XTStaUpdate    DateTime? @default(now(), map: "DF_TTrnTLampUpdate_XTStaUpdate_1") @db.DateTime
+  XIStaRelay     Int?
+  XIStaPWM1      Int?
+  XIStaPWM2      Int?
+  XIStaSignal    Int?
+  XFStaCurrent   Int?
+  XIStaAmLight   Int?
+  XIStaMode      Int?
+  XVSchStart1    String?   @db.NVarChar(5)
+  XVSchDuration1 String?   @db.NVarChar(5)
+  XISchPWM11     Int?
+  XISchPWM21     Int?
+  XVSchStart2    String?   @db.NVarChar(5)
+  XVSchDuration2 String?   @db.NVarChar(5)
+  XISchPWM12     Int?
+  XISchPWM22     Int?
+  XVSchStart3    String?   @db.NVarChar(5)
+  XVSchDuration3 String?   @db.NVarChar(5)
+  XISchPWM13     Int?
+  XISchPWM23     Int?
+  XVSchStart4    String?   @db.NVarChar(5)
+  XVSchDuration4 String?   @db.NVarChar(5)
+  XISchPWM14     Int?
+  XISchPWM24     Int?
+  XVSchStart5    String?   @db.NVarChar(5)
+  XVSchDuration5 String?   @db.NVarChar(5)
+  XISchPWM15     Int?
+  XISchPWM25     Int?
+}
+
+model TTrnTWarning {
+  XIID          BigInt    @id(map: "PK_TTrnTWarning") @default(autoincrement())
+  XVLmpCode     String?   @db.NVarChar(20)
+  XVWanType     String?   @db.NVarChar(1)
+  XTWanTime     DateTime? @db.DateTime
+  XVWanValue    String?   @db.NVarChar(100)
+  XBWanIsNotify Boolean?
+
+  @@index([XVLmpCode], map: "IX_TTrnTWarning_XVLmpCode")
+  @@index([XVWanType], map: "IX_TTrnTWarning_XVWanType")
+}
+
+model MeshGroup {
+  id        Int      @id @default(autoincrement())
+  name      String
+  devices   Device[]
+  createdAt DateTime @default(now())
+}
+
+model Device {
+  id             Int       @id @default(autoincrement())
+  macAddress     String    @unique
+  rssi           String
+  mode           String
+  workMode       String
+  ip             String
+  datetime       String
+  uptime         String
+  last_time_sync String
+  meshGroup      MeshGroup @relation(fields: [meshGroupId], references: [id])
+  meshGroupId    Int
+  createdAt      DateTime  @default(now())
+}
