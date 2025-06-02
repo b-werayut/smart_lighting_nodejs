@@ -1,6 +1,6 @@
 const config = require("dotenv").config()
 const client = require('./mqtt_connect')
-const { insertDatas } = require('./database_manage')
+const { insertDatas, insertSubDevices } = require('./database_manage')
 const processedMacs = new Set()
 
 exports.turnOnLight = async (req, res) => {
@@ -166,7 +166,6 @@ exports.getMidDatas = async (req, res) => {
 
         // const topic = 'mesh_data/toCloud/58/+'
         const { topic } = req.body
-        console.log('topic:::::', topic)
         const meshNameraw = topic.split('/')
         const meshName = meshNameraw[2]
         let responded = false
@@ -174,15 +173,16 @@ exports.getMidDatas = async (req, res) => {
         if (meshName !== '56') {
             const datastest = {
                 meshname: meshName,
-                macAddress: 'aaaaaaa',
-                rssi: String('8885'),
-                mode: 'bbbb',
-                workMode: 'sssss',
-                ip: '4555',
-                datetime: 'bbbb666',
-                uptime: '4444',
-                last_time_sync: '999'
+                macAddress: 'Mac Dummy',
+                rssi: String('8888'),
+                mode: 'Mode Dummy',
+                workMode: 'WorkMode Dummy',
+                ip: '8888',
+                datetime: '2025-06-02 06:21:10.3440000',
+                uptime: '0T00:18:48',
+                last_time_sync: '02 Jun 2025 13:03:26'
             }
+
 
             const result = await insertDatas(datastest)
             console.log("Insert Datastest to DB::", result)
@@ -193,7 +193,7 @@ exports.getMidDatas = async (req, res) => {
             if (err) return res.status(500).send('Failed to subscribe to topic')
 
             const timeout = setTimeout(() => {
-                if (!responded) {
+                if (!responded && !res.headersSent) {
                     client.removeListener('message', handler)
                     console.log('No data received from MQTT topic within timeout')
                     res.status(408).send('No data received from MQTT topic within timeout')
@@ -201,24 +201,42 @@ exports.getMidDatas = async (req, res) => {
             }, 10000)
 
             const handler = async (_, mqttMessage) => {
+                if (responded) return;
+
                 try {
-                    const data = JSON.parse(mqttMessage.toString())
+                    const data = JSON.parse(mqttMessage.toString());
+                    // console.log('Received MQTT message:', mqttMessage.toString());
 
-                    if (data.mesh?.mid !== 56) return
+                    if (data.mesh?.mid !== 56) return;
 
-                    const mac = data.mesh.mac
-                    if (processedMacs.has(mac)) return
+                    const mac = data.mesh.mac;
+                    if (processedMacs.has(mac)) return;
 
-                    processedMacs.add(mac)
-                    setTimeout(() => processedMacs.delete(mac), 10000)
+                    const subdevices = data.mesh.tree_topology;
 
-                    const rssi = String(data.mesh.rssi)
-                    const mode = data.mesh.mesh_mode
-                    const workMode = data.lighting?.workmode
-                    const ip = data.mesh?.ip
-                    const datetime = String(data.mesh?.datetime)
-                    const uptime = data.mesh?.uptime
-                    const last_time_sync = String(data.mesh?.last_time_sync)
+                    if (!subdevices || subdevices.length === 0) {
+                        console.log('Subdevices is empty. Will wait 3 seconds before retrying...');
+
+                        // ตั้งเวลาเฉย ๆ ไม่ทำอะไรเพิ่มเติม เพราะ client.on('message', handler) ยังคงทำงานอยู่
+                        setTimeout(() => {
+                            console.log('Still waiting for valid subdevices from MQTT...');
+
+                        }, 3000);
+
+                        return;
+                    }
+
+
+                    processedMacs.add(mac);
+                    setTimeout(() => processedMacs.delete(mac), 10000);
+
+                    const rssi = String(data.mesh.rssi);
+                    const mode = data.mesh.mesh_mode;
+                    const workMode = data.lighting?.workmode;
+                    const ip = data.mesh?.ip;
+                    const datetime = String(data.mesh?.datetime);
+                    const uptime = data.mesh?.uptime;
+                    const last_time_sync = String(data.mesh?.last_time_sync);
 
                     const datas = {
                         meshname: meshName,
@@ -230,22 +248,29 @@ exports.getMidDatas = async (req, res) => {
                         datetime,
                         uptime,
                         last_time_sync
-                    }
+                    };
 
                     const result = await insertDatas(datas)
-                    console.log("Insert Datas to DB::", result)
-                    clearTimeout(timeout)
-                    responded = true
 
-                    client.removeListener('message', handler)
-                    res.send(`✅ meshname: ${meshName}, mac: ${mac}, rssi: ${rssi}, mode: ${mode}, workmode: ${workMode}`)
+                    await subdevices.map( async (e) => {
+                       const insert = await insertSubDevices(mac, e)
+                    })
+
+                    clearTimeout(timeout);
+                    responded = true;
+
+                    client.removeListener('message', handler);
+                    if (!res.headersSent) {
+                        res.send(`✅ meshname: ${meshName}, mac: ${mac}, subdevices: ${subdevices.length}, rssi: ${rssi}, mode: ${mode}, workmode: ${workMode}`);
+                    }
+
                 } catch (err) {
-                    console.error('Parse Error:', err)
+                    console.error('Parse Error:', err);
                 }
             }
-
             client.on('message', handler)
         })
+
     } catch (err) {
         console.error('Server Error:', err)
         if (!res.headersSent) res.status(500).send('Server Error')

@@ -264,15 +264,15 @@ model TTrnTWarning {
 }
 
 model MeshGroup {
-  id        Int      @id @default(autoincrement())
+  id        Int           @id @default(autoincrement())
   name      String
-  devices   Device[]
-  createdAt DateTime @default(now())
+  devices   MainDevices[]
+  createdAt DateTime      @default(now())
 }
 
-model Device {
-  id             Int       @id @default(autoincrement())
-  macAddress     String    @unique
+model MainDevices {
+  id             Int          @id @default(autoincrement())
+  macAddress     String       @unique
   rssi           String
   mode           String
   workMode       String
@@ -280,7 +280,16 @@ model Device {
   datetime       String
   uptime         String
   last_time_sync String
-  meshGroup      MeshGroup @relation(fields: [meshGroupId], references: [id])
+  meshGroup      MeshGroup    @relation(fields: [meshGroupId], references: [id])
   meshGroupId    Int
-  createdAt      DateTime  @default(now())
+  subDevices     SubDevices[]
+  createdAt      DateTime     @default(now())
+}
+
+model SubDevices {
+  id           Int         @id @default(autoincrement())
+  macAddress   String      @unique
+  mainDevice   MainDevices @relation(fields: [mainDeviceId], references: [id])
+  mainDeviceId Int
+  createdAt    DateTime    @default(now())
 }
