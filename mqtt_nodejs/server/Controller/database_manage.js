@@ -58,10 +58,11 @@ exports.insertDatas = async (datas) => {
 
 exports.insertSubDevices = async (mac, subdevices) => {
     try {
+
         const mainDevices = await prisma.mainDevices.findFirst({
             where: { macAddress: mac },
         })
-
+        console.log('mainDevices:::', mainDevices)
         const subDevices = await prisma.subDevices.findFirst({
             where: { macAddress: subdevices },
         })
