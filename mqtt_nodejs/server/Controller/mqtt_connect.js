@@ -60,9 +60,7 @@ client.subscribe(topic, async (err) => {
 
       const result = await insertDatas(datas)
 
-      await subdevices.map(async (e) => {
-        const insert = await insertSubDevices(mac, e)
-      })
+      await Promise.all(subdevices.map((e) => insertSubDevices(mac, e)))
 
       // responded = true;
 
