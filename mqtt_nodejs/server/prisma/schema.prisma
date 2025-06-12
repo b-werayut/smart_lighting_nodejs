@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -263,33 +262,21 @@ model TTrnTWarning {
   @@index([XVWanType], map: "IX_TTrnTWarning_XVWanType")
 }
 
-model MeshGroup {
-  id        Int           @id @default(autoincrement())
-  name      String
-  devices   MainDevices[]
-  createdAt DateTime      @default(now())
-}
-
-model MainDevices {
-  id             Int          @id @default(autoincrement())
-  macAddress     String       @unique
+model Devices {
+  id             Int      @id @default(autoincrement())
+  macAddress     String   @unique
+  tag            String
   rssi           String
-  mode           String
-  workMode       String
+  mesh_mode      String
   ip             String
   datetime       String
+  timestamp      BigInt
   uptime         String
   last_time_sync String
-  meshGroup      MeshGroup    @relation(fields: [meshGroupId], references: [id])
-  meshGroupId    Int
-  subDevices     SubDevices[]
-  createdAt      DateTime     @default(now())
-}
-
-model SubDevices {
-  id           Int         @id @default(autoincrement())
-  macAddress   String      @unique
-  mainDevice   MainDevices @relation(fields: [mainDeviceId], references: [id])
-  mainDeviceId Int
-  createdAt    DateTime    @default(now())
+  workmode       String
+  lightmode      String
+  relay          String
+  mid            String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }

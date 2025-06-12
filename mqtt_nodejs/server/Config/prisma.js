@@ -1,21 +1,14 @@
-// const { PrismaClient } = require('../generated/prisma')
-// const prisma = new PrismaClient()
+const { PrismaClient } = require('@prisma/client')
 
-// module.exports = prisma
-
-
-const { PrismaClient } = require('../generated/prisma');
-
-let prisma;
+let prisma
 
 if (process.env.NODE_ENV === 'production') {
-  prisma = new PrismaClient();
+  prisma = new PrismaClient()
 } else {
-  if (!global.__prisma) {
-    global.__prisma = new PrismaClient();
+  if (!global.prisma) {
+    global.prisma = new PrismaClient()
   }
-  prisma = global.__prisma;
+  prisma = global.prisma
 }
-
-console.log('Create PrismaClient')
-module.exports = prisma;
+console.log("Connect prisma")
+module.exports = prisma
