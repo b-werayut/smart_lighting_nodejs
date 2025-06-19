@@ -5,84 +5,115 @@ const { insertMainDevices, insertSubDevices } = require('./database_manage')
 exports.turnOnLight = async (req, res) => {
     try {
         const { macAddress } = req.body
-        console.log('macAddressReq', macAddress)
         if (!macAddress) {
-            return res.status(400).json({ msg: 'macAddress is required' });
+            return res.status(400).json({ msg: 'macAddress is required' })
         }
 
-        const topic = `mesh_data/toDevice/56/${macAddress}`;
+        const topic = `mesh_data/toDevice/56/${macAddress}`
         const message = JSON.stringify({
             method: 'control_lighting',
             params: {
                 relay: 'ON',
-                workmode: 'MANUAL',
-                lightmode: 'PWM',
-                pwm1: 0,
-                pwm2: 40,
+                lightmode: 'PWM'
             },
-        });
+        })
 
         if (!client.connected) {
-            console.warn('⚠️ MQTT not connected');
-            return res.status(503).send('MQTT not connected');
+            console.warn('⚠️ MQTT not connected')
+            return res.status(503).send('MQTT not connected')
         }
 
         client.publish(topic, message, { qos: 1, retain: true }, (err) => {
             if (err) {
-                console.error('❌ Publish error:', err.message);
-                if (!res.headersSent) res.status(500).send('Publish failed');
+                console.error('❌ Publish error:', err.message)
+                if (!res.headersSent) res.status(500).send('Publish failed')
             } else {
-                console.log(`📤 Published to "${topic}": ${message}`);
-                if (!res.headersSent) res.json({ status: 'ON' });
+                console.log(`📤 Published to "${topic}": ${message}`)
+                if (!res.headersSent) res.json({ status: 'ON' })
             }
-        });
+        })
 
     } catch (err) {
-        console.error('❌ Server Error:', err);
-        if (!res.headersSent) res.status(500).json({ msg: 'Server Error' });
+        console.error('❌ Server Error:', err)
+        if (!res.headersSent) res.status(500).json({ msg: 'Server Error' })
     }
-};
+}
+
+exports.turnOnLightVal = async (req, res) => {
+    try {
+        const { macAddress, warmVal, coolVal } = req.body
+        if (!macAddress) {
+            return res.status(400).json({ msg: 'macAddress is required' })
+        }
+        console.log("warmVal", warmVal)
+        console.log("coolVal", coolVal)
+        const topic = `mesh_data/toDevice/56/${macAddress}`
+        const message = JSON.stringify(
+            {
+                method: 'control_lighting',
+                params: {
+                    pwm1: Number(warmVal),
+                    pwm2: Number(coolVal),
+                },
+            }
+        )
+
+        if (!client.connected) {
+            console.warn('⚠️ MQTT not connected')
+            return res.status(503).send('MQTT not connected')
+        }
+
+        client.publish(topic, message, { qos: 1, retain: true }, (err) => {
+            if (err) {
+                console.error('❌ Publish error:', err.message)
+                if (!res.headersSent) res.status(500).send('Publish failed')
+            } else {
+                console.log(`📤 Published to "${topic}": ${message}`)
+                if (!res.headersSent) res.json({ message })
+            }
+        })
+
+    } catch (err) {
+        console.error('❌ Server Error:', err)
+        if (!res.headersSent) res.status(500).json({ msg: 'Server Error' })
+    }
+}
 
 exports.turnOffLight = async (req, res) => {
     try {
         const { macAddress } = req.body
-        console.log('macAddressReq', macAddress)
         if (!macAddress) {
-            return res.status(400).json({ msg: 'macAddress is required' });
+            return res.status(400).json({ msg: 'macAddress is required' })
         }
 
-        const topic = `mesh_data/toDevice/56/${macAddress}`;
+        const topic = `mesh_data/toDevice/56/${macAddress}`
         const message = JSON.stringify({
             method: 'control_lighting',
             params: {
-                relay: 'OFF',
-                workmode: 'MANUAL',
-                lightmode: 'PWM',
-                pwm1: 0,
-                pwm2: 40,
+                relay: 'OFF'
             },
-        });
+        })
 
         if (!client.connected) {
-            console.warn('⚠️ MQTT not connected');
-            return res.status(503).send('MQTT not connected');
+            console.warn('⚠️ MQTT not connected')
+            return res.status(503).send('MQTT not connected')
         }
 
         client.publish(topic, message, { qos: 1, retain: true }, (err) => {
             if (err) {
-                console.error('❌ Publish error:', err.message);
-                if (!res.headersSent) res.status(500).send('Publish failed');
+                console.error('❌ Publish error:', err.message)
+                if (!res.headersSent) res.status(500).send('Publish failed')
             } else {
-                console.log(`📤 Published to "${topic}": ${message}`);
-                if (!res.headersSent) res.json({ status: 'OFF' });
+                console.log(`📤 Published to "${topic}": ${message}`)
+                if (!res.headersSent) res.json({ status: 'OFF' })
             }
-        });
+        })
 
     } catch (err) {
-        console.error('❌ Server Error:', err);
-        if (!res.headersSent) res.status(500).json({ msg: 'Server Error' });
+        console.error('❌ Server Error:', err)
+        if (!res.headersSent) res.status(500).json({ msg: 'Server Error' })
     }
-};
+}
 
 
 exports.deviceResp = async (req, res) => {
@@ -177,7 +208,7 @@ exports.getMidDatas = async (req, res,) => {
 
         let responded = false
 
-        const processedMacs = new Set();
+        const processedMacs = new Set()
 
         client.subscribe(topic, async (err) => {
             if (err) return res.status(500).send('Failed to subscribe to topic')
@@ -193,48 +224,48 @@ exports.getMidDatas = async (req, res,) => {
             let datasMainDevices = ''
             let datasSubDevices = ''
             const handler = async (_, mqttMessage) => {
-                if (responded) return;
+                if (responded) return
 
                 try {
-                    const data = JSON.parse(mqttMessage.toString());
-                    // console.log('Received MQTT message:', mqttMessage.toString());
+                    const data = JSON.parse(mqttMessage.toString())
+                    // console.log('Received MQTT message:', mqttMessage.toString())
 
-                    if (data.mesh?.mid !== 56) return;
+                    if (data.mesh?.mid !== 56) return
 
-                    const mac = data.mesh?.mac;
-                    const rssi = String(data.mesh.rssi);
-                    const mode = data.mesh.mesh_mode;
-                    const workMode = data.lighting?.workmode;
+                    const mac = data.mesh?.mac
+                    const rssi = String(data.mesh.rssi)
+                    const mode = data.mesh.mesh_mode
+                    const workMode = data.lighting?.workmode
                     const parent = data.mesh?.parent
-                    const ip = data.mesh?.ip;
-                    const tree_topology = data.mesh?.tree_topology;
-                    const datetime = String(data.mesh?.datetime);
-                    const uptime = data.mesh?.uptime;
-                    const last_time_sync = String(data.mesh?.last_time_sync);
+                    const ip = data.mesh?.ip
+                    const tree_topology = data.mesh?.tree_topology
+                    const datetime = String(data.mesh?.datetime)
+                    const uptime = data.mesh?.uptime
+                    const last_time_sync = String(data.mesh?.last_time_sync)
 
-                    if (processedMacs.has(mac)) return;
+                    if (processedMacs.has(mac)) return
 
                     // if (!tree_topology || tree_topology.length === 0) {
-                    //     console.log('Subdevices is empty. Will wait 3 seconds before retrying...');
+                    //     console.log('Subdevices is empty. Will wait 3 seconds before retrying...')
 
                     //     // ตั้งเวลาเฉย ๆ ไม่ทำอะไรเพิ่มเติม เพราะ client.on('message', handler) ยังคงทำงานอยู่
                     //     setTimeout(() => {
-                    //         console.log('Still waiting for valid subdevices from MQTT...');
+                    //         console.log('Still waiting for valid subdevices from MQTT...')
 
-                    //     }, 3000);
+                    //     }, 3000)
 
-                    //     return;
+                    //     return
                     // }
 
-                    processedMacs.add(mac);
-                    setTimeout(() => processedMacs.delete(mac), 10000);
+                    processedMacs.add(mac)
+                    setTimeout(() => processedMacs.delete(mac), 10000)
 
-                    clearTimeout(timeout);
-                    responded = true;
+                    clearTimeout(timeout)
+                    responded = true
 
-                    client.removeListener('message', handler);
+                    client.removeListener('message', handler)
                     if (!res.headersSent) {
-                        res.send(`✅ mac: ${mac}, tree_topology: ${tree_topology.length}, rssi: ${rssi}, mode: ${mode}, workmode: ${workMode}`);
+                        res.send(`✅ mac: ${mac}, tree_topology: ${tree_topology.length}, rssi: ${rssi}, mode: ${mode}, workmode: ${workMode}`)
                     }
 
 
@@ -252,7 +283,7 @@ exports.getMidDatas = async (req, res,) => {
                                 datetime,
                                 uptime,
                                 last_time_sync
-                            };
+                            }
                             console.log('Data to insertMainDevices', datasMainDevices)
                             const maindevice = await insertMainDevices(datasMainDevices)
                         }
@@ -260,23 +291,23 @@ exports.getMidDatas = async (req, res,) => {
 
                     if (mode === "NODE") {
                         console.log("Mode: NODE")
-                            datasSubDevices = {
-                                macAddress: mac,
-                                rssi,
-                                mode,
-                                workMode,
-                                parent,
-                                ip,
-                                datetime,
-                                uptime,
-                                last_time_sync
-                            }
-                            console.log('Data to insertMainDevices', datasSubDevices)
-                            const subdevice = await insertSubDevices(datasSubDevices)
+                        datasSubDevices = {
+                            macAddress: mac,
+                            rssi,
+                            mode,
+                            workMode,
+                            parent,
+                            ip,
+                            datetime,
+                            uptime,
+                            last_time_sync
+                        }
+                        console.log('Data to insertMainDevices', datasSubDevices)
+                        const subdevice = await insertSubDevices(datasSubDevices)
                     }
 
                 } catch (err) {
-                    console.error('Parse Error:', err);
+                    console.error('Parse Error:', err)
                 }
             }
             client.on('message', handler)
@@ -292,25 +323,94 @@ exports.getMidDatas = async (req, res,) => {
 }
 
 
-exports.scheduleLight = async (req, res) => {
+exports.setScheduleLight = async (req, res) => {
     try {
-        const topic = 'mesh_data/toDevice/56'
-        const message = ({
-            "method": "config_lighting",
-            "params": {
-                "pwm_freq ": 500,
-                "pwm1_min_params": 0,
-                "pwm1_max_params": 4096,
-                "pwm2_min_params": 0,
-                "pwm2_max_params": 4096,
-                "pwm1_lux_error": 0,
-                "pwm2_lux_error ": 0,
-            }
+        const datas = req.body
+        if (!Array.isArray(datas)) {
+            return res.status(400).json({ msg: 'Invalid request format, expected an array' })
         }
-        )
+
+        const macAddress = datas[0]?.macAddress
+        if (!macAddress) {
+            return res.status(400).json({ msg: 'Missing macAddress' })
+        }
+
+        const topic = `mesh_data/toDevice/56/${macAddress}`
+
+        if (!client.connected) {
+            console.warn('⚠️ MQTT not connected')
+            return res.status(503).send('MQTT not connected')
+        }
+
+        await Promise.all(datas.map((items) => {
+            return new Promise((resolve, reject) => {
+                const message = JSON.stringify({
+                    method: "config_schedule_profile",
+                    params: {
+                        dayofweek: "all",
+                        active: true,
+                        no: Number(items.no),
+                        start_time: items.starttime,
+                        end_time: items.endtime,
+                        pwm1: Number(items.warmval),
+                        pwm2: Number(items.coolval),
+                        lightmode: "PWM"
+                    }
+                })
+
+                client.publish(topic, message, { qos: 1, retain: true }, (err) => {
+                    if (err) {
+                        console.error('❌ Publish error:', err.message)
+                        return reject(err)
+                    } else {
+                        console.log(`📤 Published to "${topic}": ${message}`)
+                        resolve()
+                    }
+                })
+            })
+        }))
+
+        res.json({ status: 'OK', published: datas.length })
 
     } catch (err) {
         console.log('❌ Server Error:', err)
+        if (!res.headersSent) res.status(500).json({ msg: 'Server Error' })
+    }
+}
+
+exports.updateModeMqtt = async (req, res) => {
+    try {
+        const { macAddress, mode } = req.body
+        if (!macAddress) {
+            return res.status(400).json({ msg: 'macAddress is required' })
+        }
+
+        const topic = `mesh_data/toDevice/56/${macAddress}`
+        const message = JSON.stringify({
+            method: 'control_lighting',
+            params: {
+                workmode: mode,
+                lightmode: "PWM"
+            },
+        })
+
+        if (!client.connected) {
+            console.warn('⚠️ MQTT not connected')
+            return res.status(503).send('MQTT not connected')
+        }
+
+        client.publish(topic, message, { qos: 1, retain: true }, (err) => {
+            if (err) {
+                console.error('❌ Publish error:', err.message)
+                if (!res.headersSent) res.status(500).send('Publish failed')
+                res.json({ msg: "Error" })
+            } else {
+                console.log(`📤 Published to "${topic}": ${message}`)
+                res.json({ msg: "OK" })
+            }
+        })
+    } catch (err) {
+        console.error('❌ Server Error:', err)
         if (!res.headersSent) res.status(500).json({ msg: 'Server Error' })
     }
 }

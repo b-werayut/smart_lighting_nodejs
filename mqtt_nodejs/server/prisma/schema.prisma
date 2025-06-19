@@ -269,13 +269,19 @@ model Devices {
   rssi           String
   mesh_mode      String
   ip             String
+  lat            Int
+  lng            Int
+  layer          Int
   datetime       String
-  timestamp      BigInt
+  timestamp      Int
   uptime         String
   last_time_sync String
   workmode       String
   lightmode      String
   relay          String
+  pwm_freq       Int
+  pwm1           Int
+  pwm2           Int
   mid            String
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt

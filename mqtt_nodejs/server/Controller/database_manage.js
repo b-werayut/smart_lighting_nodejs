@@ -235,6 +235,9 @@ exports.insertDevices = async (data) => {
       rssi,
       mesh_mode,
       ip,
+      lat,
+      lng,
+      layer,
       datetime,
       timestamp,
       uptime,
@@ -242,6 +245,9 @@ exports.insertDevices = async (data) => {
       workmode,
       lightmode,
       relay,
+      pwm_freq,
+      pwm1,
+      pwm2,
       mid } = data
 
     const Devices = await prisma.Devices.upsert({
@@ -251,6 +257,9 @@ exports.insertDevices = async (data) => {
         rssi,
         mesh_mode,
         ip,
+        lat,
+        lng,
+        layer,
         datetime,
         timestamp,
         uptime,
@@ -258,6 +267,10 @@ exports.insertDevices = async (data) => {
         workmode,
         lightmode,
         relay,
+        relay,
+        pwm_freq,
+        pwm1,
+        pwm2,
         mid
       },
       create: {
@@ -271,5 +284,36 @@ exports.insertDevices = async (data) => {
 
   } catch (err) {
     console.error('❌ insertDevices error:', err)
+  }
+}
+
+exports.updateMode = async (req, res) => {
+  try {
+    const { macAddress, mode } = req.body
+    const modeupdate = await prisma.Devices.update({
+      where: { macAddress },
+      data: {
+        workmode: mode
+      }
+    })
+    console.log(`MacAddress: ${macAddress} | Modeupdate: ${modeupdate.workmode}`)
+    res.json({ msg: "OK" })
+  } catch (err) {
+    console.log(err)
+    res.json({ msg: "Error" })
+  }
+}
+
+exports.getMacDatas = async (req, res) => {
+  try {
+    const { macaddress } = req.params
+    const obj = await prisma.Devices.findMany({
+      where: { macAddress: String(macaddress) }
+    })
+    // console.log(`datas ${mac}`)
+    res.json({ data: obj })
+  } catch (err) {
+    console.log(err)
+    res.json({ msg: "Error" })
   }
 }

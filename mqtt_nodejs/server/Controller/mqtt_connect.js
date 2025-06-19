@@ -45,6 +45,9 @@ client.on('message', async (_, mqttMessage) => {
       rssi,
       mesh_mode,
       ip,
+      lat,
+      lng,
+      layer,
       datetime,
       timestamp,
       uptime,
@@ -55,7 +58,10 @@ client.on('message', async (_, mqttMessage) => {
     const {
       workmode,
       lightmode,
-      relay
+      relay,
+      pwm_freq,
+      pwm1,
+      pwm2,
     } = data.lighting || {}
 
     const formattedData = {
@@ -64,11 +70,17 @@ client.on('message', async (_, mqttMessage) => {
       rssi: String(rssi),
       mesh_mode,
       ip,
+      lat,
+      lng,
+      layer,
       datetime: String(datetime),
-      timestamp: BigInt(timestamp),
+      timestamp: Number(timestamp),
       uptime,
       last_time_sync: String(last_time_sync),
       workmode,
+      pwm_freq,
+      pwm1,
+      pwm2,
       lightmode: String(lightmode),
       relay: String(relay),
       mid: String(mid),
