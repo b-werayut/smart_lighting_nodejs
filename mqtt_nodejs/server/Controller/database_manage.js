@@ -317,3 +317,38 @@ exports.getMacDatas = async (req, res) => {
     res.json({ msg: "Error" })
   }
 }
+
+exports.getLampTime = async (req, res) => {
+  try {
+    const lamptime = await prisma.Devices.findMany({
+      select: {
+        timestamp: true
+      }
+    })
+
+    res.json(lamptime)
+
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({ msg: err })
+  }
+}
+
+exports.getAlldevices = async (req, res) => {
+  try {
+    const devices = await prisma.Devices.findMany({
+      select: {
+        macAddress: true,
+        tag: true,
+        relay: true,
+        pwm_freq: true,
+        lightmode: true
+      }
+    })
+    // console.log(`datas ${obj}`)
+    res.json({ devices })
+  } catch (err) {
+    console.log(err)
+    res.json({ msg: "Error" })
+  }
+}
