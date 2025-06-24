@@ -283,6 +283,31 @@ model Devices {
   pwm1           Int
   pwm2           Int
   mid            String
+  schStartTime1  String?
+  schEndTime1    String?
+  schPwm11       Int?
+  schPwm21       Int?
+  schActive1     String?
+  schStartTime2  String?
+  schEndTime2    String?
+  schPwm12       Int?
+  schPwm22       Int?
+  schActive2     String?
+  schStartTime3  String?
+  schEndTime3    String?
+  schPwm13       Int?
+  schPwm23       Int?
+  schActive3     String?
+  schStartTime4  String?
+  schEndTime4    String?
+  schPwm14       Int?
+  schPwm24       Int?
+  schActive4     String?
+  schStartTime5  String?
+  schEndTime5    String?
+  schPwm15       Int?
+  schPwm25       Int?
+  schActive5     String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }

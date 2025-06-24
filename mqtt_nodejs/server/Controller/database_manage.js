@@ -248,9 +248,11 @@ exports.insertDevices = async (data) => {
       pwm_freq,
       pwm1,
       pwm2,
-      mid } = data
+      mid,
+      schList
+    } = data
 
-    const Devices = await prisma.Devices.upsert({
+    const devices = await prisma.Devices.upsert({
       where: { macAddress },
       update: {
         tag,
@@ -271,16 +273,120 @@ exports.insertDevices = async (data) => {
         pwm_freq,
         pwm1,
         pwm2,
-        mid
+        mid,
+        schPwm11: Number(0),
+        schPwm21: Number(0),
+        schPwm12: Number(0),
+        schPwm22: Number(0),
+        schPwm13: Number(0),
+        schPwm23: Number(0),
+        schPwm14: Number(0),
+        schPwm24: Number(0),
+        schPwm15: Number(0),
+        schPwm25: Number(0),
       },
       create: {
-        ...data
+        macAddress,
+        tag,
+        rssi,
+        mesh_mode,
+        ip,
+        lat,
+        lng,
+        layer,
+        datetime,
+        timestamp,
+        uptime,
+        last_time_sync,
+        workmode,
+        lightmode,
+        relay,
+        relay,
+        pwm_freq,
+        pwm1,
+        pwm2,
+        mid,
+        schStartTime1: "00:00",
+        schStartTime2: "00:00",
+        schStartTime3: "00:00",
+        schStartTime4: "00:00",
+        schStartTime5: "00:00",
+        schEndTime1: "00:00",
+        schEndTime2: "00:00",
+        schEndTime3: "00:00",
+        schEndTime4: "00:00",
+        schEndTime5: "00:00",
+        schActive1: "false",
+        schActive2: "false",
+        schActive3: "false",
+        schActive4: "false",
+        schActive5: "false",
+        schPwm11: Number(0),
+        schPwm21: Number(0),
+        schPwm12: Number(0),
+        schPwm22: Number(0),
+        schPwm13: Number(0),
+        schPwm23: Number(0),
+        schPwm14: Number(0),
+        schPwm24: Number(0),
+        schPwm15: Number(0),
+        schPwm25: Number(0),
       },
     })
+    console.log('✅ Devices upserted :', devices)
 
-    console.log('✅ Devices upserted :')
-    console.log(Devices)
-    return Devices
+    if (Array.isArray(schList) && schList.length > 0) {
+      const updateData = {};
+      const createData = {
+        macAddress,
+        tag,
+        rssi,
+        mesh_mode,
+        ip,
+        lat,
+        lng,
+        layer,
+        datetime,
+        timestamp,
+        uptime,
+        last_time_sync,
+        workmode,
+        lightmode,
+        relay,
+        pwm_freq,
+        pwm1,
+        pwm2,
+        mid,
+      };
+
+      for (let i = 0; i < Math.min(5, schList.length); i++) {
+        const schedule = schList[i];
+        const idx = i + 1; 
+
+        updateData[`schStartTime${idx}`] = schedule.start_time;
+        updateData[`schEndTime${idx}`] = schedule.end_time;
+        updateData[`schActive${idx}`] = String(schedule.active);
+        updateData[`schPwm1${idx}`] = Number(schedule.pwm1);
+        updateData[`schPwm2${idx}`] = Number(schedule.pwm2);
+
+        createData[`schStartTime${idx}`] = schedule.start_time;
+        createData[`schEndTime${idx}`] = schedule.end_time;
+        createData[`schActive${idx}`] = String(schedule.active);
+        createData[`schPwm1${idx}`] = Number(schedule.pwm1);
+        createData[`schPwm2${idx}`] = Number(schedule.pwm2);
+      }
+
+      await prisma.Devices.upsert({
+        where: { id: devices.id },
+        update: updateData,
+        create: createData,
+      });
+
+      console.log('✅ Schedule data upserted (separated by 5 index)');
+    }
+
+    return devices;
+
 
   } catch (err) {
     console.error('❌ insertDevices error:', err)

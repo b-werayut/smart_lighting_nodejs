@@ -64,29 +64,32 @@ client.on('message', async (_, mqttMessage) => {
       pwm2,
     } = data.lighting || {}
 
-    const formattedData = {
-      macAddress: mac,
-      tag,
-      rssi: String(rssi),
-      mesh_mode,
-      ip,
-      lat,
-      lng,
-      layer,
-      datetime: String(datetime),
-      timestamp: Number(timestamp),
-      uptime,
-      last_time_sync: String(last_time_sync),
-      workmode,
-      pwm_freq,
-      pwm1,
-      pwm2,
-      lightmode: String(lightmode),
-      relay: String(relay),
-      mid: String(mid),
-    }
+    const schedulelist = data.schedule?.sunday?.list
+    
+        const formattedData = {
+          macAddress: mac,
+          tag,
+          rssi: String(rssi),
+          mesh_mode,
+          ip,
+          lat,
+          lng,
+          layer,
+          datetime: String(datetime),
+          timestamp: Number(timestamp),
+          uptime,
+          last_time_sync: String(last_time_sync),
+          workmode,
+          pwm_freq,
+          pwm1,
+          pwm2,
+          lightmode: String(lightmode),
+          relay: String(relay),
+          mid: String(mid),
+          schList: schedulelist
+        }
 
-    messageQueue.push(formattedData)
+        messageQueue.push(formattedData)
 
   } catch (err) {
     console.error('❌ Parse Error:', err.message)
