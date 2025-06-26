@@ -448,7 +448,9 @@ exports.getAlldevices = async (req, res) => {
         tag: true,
         relay: true,
         pwm_freq: true,
-        lightmode: true
+        lightmode: true,
+        pwm1: true,
+        pwm2: true,
       }
     })
     // console.log(`datas ${obj}`)

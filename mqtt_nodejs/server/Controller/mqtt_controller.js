@@ -105,14 +105,50 @@ exports.turnOffAllLight = async (req, res) => {
     }
 }
 
+exports.turnOnAllLightVal = async (req, res) => {
+    try {
+
+        const { warmVal, coolVal } = req.body
+
+        const topic = `mesh_data/toDevice/56`
+        const message = JSON.stringify(
+            {
+                method: 'control_lighting',
+                params: {
+                    pwm1: Number(warmVal),
+                    pwm2: Number(coolVal),
+                },
+            }
+        )
+
+        if (!client.connected) {
+            console.warn('⚠️ MQTT not connected')
+            return res.status(503).send('MQTT not connected')
+        }
+
+        client.publish(topic, message, { qos: 1, retain: true }, (err) => {
+            if (err) {
+                console.error('❌ Publish error:', err.message)
+                if (!res.headersSent) res.status(500).send('Failed')
+            } else {
+                console.log(`📤 Published to "${topic}": ${message}`)
+                if (!res.headersSent) res.json({ status: 'Success' })
+            }
+        })
+
+    } catch (err) {
+        console.error('❌ Server Error:', err)
+        if (!res.headersSent) res.status(500).json({ msg: 'Server Error' })
+    }
+}
+
 exports.turnOnLightVal = async (req, res) => {
     try {
         const { macAddress, warmVal, coolVal } = req.body
         if (!macAddress) {
             return res.status(400).json({ msg: 'macAddress is required' })
         }
-        console.log("warmVal", warmVal)
-        console.log("coolVal", coolVal)
+
         const topic = `mesh_data/toDevice/56/${macAddress}`
         const message = JSON.stringify(
             {
