@@ -76,7 +76,7 @@ client.on('message', async (_, mqttMessage) => {
           lng,
           layer,
           datetime: String(datetime),
-          timestamp: Number(timestamp),
+          timestamp: String(timestamp),
           uptime,
           last_time_sync: String(last_time_sync),
           workmode,
