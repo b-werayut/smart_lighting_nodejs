@@ -361,7 +361,7 @@ exports.insertDevices = async (data) => {
 
       for (let i = 0; i < Math.min(5, schList.length); i++) {
         const schedule = schList[i];
-        const idx = i + 1; 
+        const idx = i + 1;
 
         updateData[`schStartTime${idx}`] = schedule.start_time;
         updateData[`schEndTime${idx}`] = schedule.end_time;
@@ -459,5 +459,22 @@ exports.getAlldevices = async (req, res) => {
   } catch (err) {
     console.log(err)
     res.json({ msg: "Error" })
+  }
+}
+
+exports.deleteDevices = async (req, res) => {
+  try {
+    const { macAddress } = req.body
+    const devices = await prisma.devices.delete({
+      where: {
+        macAddress
+      }
+    })
+    
+    console.log(`Devices ${devices?.macAddress} is Delete`)
+    res.json({status: `Devices ${devices?.macAddress} is Delete`})
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({ status: "Server Error" })
   }
 }
