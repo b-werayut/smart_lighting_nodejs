@@ -249,7 +249,7 @@ exports.insertDevices = async (data) => {
       pwm1,
       pwm2,
       mid,
-      schList
+      schListSunday
     } = data
 
     const devices = await prisma.Devices.upsert({
@@ -335,7 +335,7 @@ exports.insertDevices = async (data) => {
     })
     console.log('✅ Devices upserted :', devices)
 
-    if (Array.isArray(schList) && schList.length > 0) {
+    if (Array.isArray(schListSunday) && schListSunday.length > 0) {
       const updateData = {};
       const createData = {
         macAddress,
@@ -359,8 +359,8 @@ exports.insertDevices = async (data) => {
         mid,
       };
 
-      for (let i = 0; i < Math.min(5, schList.length); i++) {
-        const schedule = schList[i];
+      for (let i = 0; i < Math.min(5, schListSunday.length); i++) {
+        const schedule = schListSunday[i];
         const idx = i + 1;
 
         updateData[`schStartTime${idx}`] = schedule.start_time;
@@ -463,6 +463,31 @@ exports.getAlldevices = async (req, res) => {
   }
 }
 
+exports.getGroupdevices = async (req, res) => {
+  try {
+    const { group } = req.params
+
+    const groupdevices = await prisma.Devices.findMany({
+      where: {
+        mid: String(group)
+      },
+      select: {
+        macAddress: true,
+        tag: true,
+        relay: true,
+        pwm_freq: true,
+        lightmode: true,
+        mid: true,
+        workmode: true,
+      }
+    })
+    res.json({ groupdevices })
+  } catch (err) {
+    console.log(err)
+    res.json({ msg: "Error" })
+  }
+}
+
 exports.deleteDevices = async (req, res) => {
   try {
     const { macAddress } = req.body
@@ -471,9 +496,9 @@ exports.deleteDevices = async (req, res) => {
         macAddress
       }
     })
-    
+
     console.log(`Devices ${devices?.macAddress} is Delete`)
-    res.json({status: `Devices ${devices?.macAddress} is Delete`})
+    res.json({ status: `Devices ${devices?.macAddress} is Delete` })
   } catch (err) {
     console.log(err)
     res.status(500).json({ status: "Server Error" })

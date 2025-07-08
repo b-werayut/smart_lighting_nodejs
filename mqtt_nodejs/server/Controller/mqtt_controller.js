@@ -115,6 +115,8 @@ exports.turnOnAllLightVal = async (req, res) => {
             {
                 method: 'control_lighting',
                 params: {
+                    relay: 'ON',
+                    lightmode: 'PWM',
                     pwm1: Number(warmVal),
                     pwm2: Number(coolVal),
                 },
@@ -144,7 +146,7 @@ exports.turnOnAllLightVal = async (req, res) => {
 
 exports.turnOnLightVal = async (req, res) => {
     try {
-        const { macAddress, warmVal, coolVal } = req.body
+        const { macAddress, relay, warmVal, coolVal } = req.body
         if (!macAddress) {
             return res.status(400).json({ msg: 'macAddress is required' })
         }
@@ -154,6 +156,7 @@ exports.turnOnLightVal = async (req, res) => {
             {
                 method: 'control_lighting',
                 params: {
+                    relay,
                     pwm1: Number(warmVal),
                     pwm2: Number(coolVal),
                 },

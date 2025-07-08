@@ -65,7 +65,13 @@ client.on('message', async (_, mqttMessage) => {
       pwm2,
     } = data.lighting || {}
 
-    const schedulelist = data.schedule?.sunday?.list
+    const scheduleListSunday = data.schedule?.sunday?.list
+    const scheduleListMonday = data.schedule?.monday?.list
+    const scheduleListTuesday = data.schedule?.tuesday?.list
+    const scheduleListWednesday = data.schedule?.wednesday?.list
+    const scheduleListThursday = data.schedule?.thursday?.list
+    const scheduleListFriday = data.schedule?.friday?.list
+    const scheduleListSaturday = data.schedule?.saturday?.list
     
         const formattedData = {
           macAddress: mac,
@@ -87,7 +93,13 @@ client.on('message', async (_, mqttMessage) => {
           lightmode: String(lightmode),
           relay: String(relay),
           mid: String(mid),
-          schList: schedulelist
+          schListSunday: scheduleListSunday,
+          schListMonday: scheduleListMonday,
+          schListTuesday: scheduleListTuesday,
+          schListWednesday: scheduleListWednesday,
+          schListThursday: scheduleListThursday,
+          schListFriday: scheduleListFriday,
+          schListSaturday: scheduleListSaturday,
         }
 
         messageQueue.push(formattedData)

@@ -1,6 +1,6 @@
 const express = require('express')
 const { turnOffLight, turnOnLight, deviceResp, updateModeMqtt, turnOnLightVal, setScheduleLight, turnOnAllLight, turnOffAllLight, turnOnAllLightVal } = require('../Controller/mqtt_controller')
-const { getMacDatas, getLampTime, getAlldevices, deleteDevices } = require('../Controller/database_manage')
+const { getMacDatas, getLampTime, getAlldevices, deleteDevices, getGroupdevices } = require('../Controller/database_manage')
 const router = express.Router()
 
 router.post("/turnonlight", turnOnLight)
@@ -14,6 +14,7 @@ router.post("/setschedule", setScheduleLight)
 
 router.get('/getLampTime', getLampTime)
 router.get('/getalldevices', getAlldevices)
+router.get('/getgroupdevices/:group', getGroupdevices)
 router.get("/deviceresp", deviceResp)
 router.get("/getmacdatas/:macaddress", getMacDatas)
 
