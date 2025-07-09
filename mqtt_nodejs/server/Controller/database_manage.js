@@ -465,28 +465,45 @@ exports.getAlldevices = async (req, res) => {
 
 exports.getGroupdevices = async (req, res) => {
   try {
-    const { group } = req.params
+    const group = String(req.params.group); // แปลงเป็นตัวเลขก่อนเปรียบเทียบ
+    let groupdevices;
 
-    const groupdevices = await prisma.Devices.findMany({
-      where: {
-        mid: String(group)
-      },
-      select: {
-        macAddress: true,
-        tag: true,
-        relay: true,
-        pwm_freq: true,
-        lightmode: true,
-        mid: true,
-        workmode: true,
-      }
-    })
-    res.json({ groupdevices })
+    if (group === '0') {
+      groupdevices = await prisma.Devices.findMany({
+        select: {
+          macAddress: true,
+          tag: true,
+          relay: true,
+          pwm_freq: true,
+          lightmode: true,
+          mid: true,
+          workmode: true,
+        }
+      });
+    } else {
+      groupdevices = await prisma.Devices.findMany({
+        where: {
+          mid: String(group)
+        },
+        select: {
+          macAddress: true,
+          tag: true,
+          relay: true,
+          pwm_freq: true,
+          lightmode: true,
+          mid: true,
+          workmode: true,
+        }
+      });
+    }
+
+    res.json({ groupdevices });
   } catch (err) {
-    console.log(err)
-    res.json({ msg: "Error" })
+    console.log(err);
+    res.json({ msg: "Error" });
   }
 }
+
 
 exports.deleteDevices = async (req, res) => {
   try {

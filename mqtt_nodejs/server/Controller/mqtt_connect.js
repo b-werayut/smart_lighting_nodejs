@@ -25,7 +25,7 @@ client.on('connect', () => {
     if (err) {
       console.error('❌ MQTT Subscribe Error:', err.message)
     } else {
-      console.log(`📡 Subscribed to topic: ${topic}`)
+      console.log(`✅ Subscribed Success `)
     }
   })
 })

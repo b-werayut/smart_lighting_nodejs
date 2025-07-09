@@ -107,40 +107,46 @@ exports.turnOffAllLight = async (req, res) => {
 
 exports.turnOnAllLightVal = async (req, res) => {
     try {
+        const { relay, warmVal, coolVal, group } = req.body;
 
-        const { warmVal, coolVal } = req.body
+        if (relay === undefined || warmVal === undefined || coolVal === undefined) {
+            return res.status(400).json({ msg: 'Missing required fields' });
+        }
 
-        const topic = `mesh_data/toDevice/56`
-        const message = JSON.stringify(
-            {
-                method: 'control_lighting',
-                params: {
-                    relay: 'ON',
-                    lightmode: 'PWM',
-                    pwm1: Number(warmVal),
-                    pwm2: Number(coolVal),
-                },
-            }
-        )
+        const groupStr = String(group ?? '0');
+        const topic = groupStr === '0'
+            ? 'mesh_data/toDevice/'
+            : `mesh_data/toDevice/${groupStr}`;
 
-        if (!client.connected) {
-            console.warn('⚠️ MQTT not connected')
-            return res.status(503).send('MQTT not connected')
+        const message = JSON.stringify({
+            method: 'control_lighting',
+            params: {
+                relay: String(relay),
+                workmode: "MANUAL",
+                lightmode: 'PWM',
+                pwm1: Number(warmVal),
+                pwm2: Number(coolVal),
+            },
+        });
+
+        if (!client || !client.connected) {
+            console.warn('⚠️ MQTT not connected');
+            return res.status(503).send('MQTT not connected');
         }
 
         client.publish(topic, message, { qos: 1, retain: true }, (err) => {
             if (err) {
-                console.error('❌ Publish error:', err.message)
-                if (!res.headersSent) res.status(500).send('Failed')
+                console.error('❌ Publish error:', err.message);
+                if (!res.headersSent) res.status(500).send('Failed');
             } else {
-                console.log(`📤 Published to "${topic}": ${message}`)
-                if (!res.headersSent) res.json({ status: 'Success' })
+                console.log(`📤 Published to "${topic}": ${message}`);
+                if (!res.headersSent) res.json({ status: 'Success' });
             }
-        })
+        });
 
     } catch (err) {
-        console.error('❌ Server Error:', err)
-        if (!res.headersSent) res.status(500).json({ msg: 'Server Error' })
+        console.error('❌ Server Error:', err);
+        if (!res.headersSent) res.status(500).json({ msg: 'Server Error' });
     }
 }
 
