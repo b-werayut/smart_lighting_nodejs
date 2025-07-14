@@ -333,7 +333,7 @@ exports.insertDevices = async (data) => {
         schPwm25: Number(0),
       },
     })
-    console.log('✅ Devices upserted :', devices)
+    // console.log('✅ Devices upserted :', devices)
 
     if (Array.isArray(schListSunday) && schListSunday.length > 0) {
       const updateData = {};
@@ -382,12 +382,10 @@ exports.insertDevices = async (data) => {
         create: createData,
       });
 
-      console.log('✅ Schedule data upserted (separated by 5 index)');
+      // console.log('✅ Schedule data upserted (separated by 5 index)');
     }
-
     return devices;
-
-
+    
   } catch (err) {
     console.error('❌ insertDevices error:', err)
   }

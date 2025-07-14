@@ -2,6 +2,11 @@ const config = require("dotenv").config()
 const client = require('./mqtt_connect')
 const { insertMainDevices, insertSubDevices } = require('./database_manage')
 
+
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 exports.turnOnLight = async (req, res) => {
     try {
         const { macAddress } = req.body
@@ -433,58 +438,123 @@ exports.getMidDatas = async (req, res,) => {
     }
 }
 
-
 exports.setScheduleLight = async (req, res) => {
     try {
-        const datas = req.body
-        if (!Array.isArray(datas)) {
-            return res.status(400).json({ msg: 'Invalid request format, expected an array' })
+        const datas = req.body;
+
+        if (!Array.isArray(datas?.schedule)) {
+            return res.status(400).json({ msg: 'Invalid request format, expected an array' });
         }
 
-        const macAddress = datas[0]?.macAddress
+        const macAddress = datas?.macAddress;
         if (!macAddress) {
-            return res.status(400).json({ msg: 'Missing macAddress' })
+            return res.status(400).json({ msg: 'Missing macAddress' });
         }
 
         const topic = `mesh_data/toDevice/56/${macAddress}`
 
         if (!client.connected) {
-            console.warn('⚠️ MQTT not connected')
-            return res.status(503).send('MQTT not connected')
+            console.warn('⚠️ MQTT not connected');
+            return res.status(503).send('MQTT not connected');
         }
 
-        await Promise.all(datas.map((items) => {
-            return new Promise((resolve, reject) => {
-                const message = JSON.stringify({
-                    method: "config_schedule_profile",
-                    params: {
-                        dayofweek: "all",
-                        active: true,
-                        no: Number(items.no),
-                        start_time: items.starttime,
-                        end_time: items.endtime,
-                        pwm1: Number(items.warmval),
-                        pwm2: Number(items.coolval),
-                        lightmode: "PWM"
-                    }
-                })
+        for (const [index, items] of datas.schedule.entries()) {
+            const message = JSON.stringify({
+                method: "config_schedule_profile",
+                params: {
+                    dayofweek: "all",
+                    active: true,
+                    no: Number(items.no),
+                    start_time: items.starttime,
+                    end_time: items.endtime,
+                    pwm1: Number(items.warmval),
+                    pwm2: Number(items.coolval),
+                    lightmode: "PWM"
+                }
+            })
 
+            await new Promise((resolve, reject) => {
                 client.publish(topic, message, { qos: 1, retain: true }, (err) => {
                     if (err) {
                         console.error('❌ Publish error:', err.message)
-                        return reject(err)
+                        return reject(err);
                     } else {
                         console.log(`📤 Published to "${topic}": ${message}`)
-                        resolve()
+                        resolve();
                     }
                 })
             })
-        }))
 
-        res.json({ status: 'OK', published: datas.length })
+            if (index < datas.schedule.length - 1) {
+                await delay(2000)
+            }
+        }
+
+        res.json({ status: 'OK', published: datas.schedule.length })
 
     } catch (err) {
-        console.log('❌ Server Error:', err)
+        console.log('❌ Server Error:', err);
+        if (!res.headersSent) res.status(500).json({ msg: 'Server Error' })
+    }
+}
+
+exports.setAllScheduleLight = async (req, res) => {
+    try {
+        const datas = req.body;
+        const group = datas?.group;
+
+        if (!Array.isArray(datas?.schedule)) {
+            return res.status(400).json({ msg: 'Invalid request format, expected an array' });
+        }else{
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            res.json({ status: 'OK', published: datas?.schedule.length })
+        }
+
+        if (!group) {
+            return res.status(400).json({ msg: 'Missing group' });
+        }
+
+        if (!client.connected) {
+            console.warn('⚠️ MQTT not connected');
+            return res.status(503).send('MQTT not connected');
+        }
+
+        const topic = `mesh_data/toDevice/${group}`;
+
+        for (const [index, items] of datas?.schedule.entries()) {
+            const message = JSON.stringify({
+                method: "config_schedule_profile",
+                params: {
+                    dayofweek: "all",
+                    active: true,
+                    no: Number(items.no),
+                    start_time: items.starttime,
+                    end_time: items.endtime,
+                    pwm1: Number(items.warmval),
+                    pwm2: Number(items.coolval),
+                    lightmode: "PWM"
+                }
+            })
+
+            await new Promise((resolve, reject) => {
+                client.publish(topic, message, { qos: 1, retain: true }, (err) => {
+                    if (err) {
+                        console.error('❌ Publish error:', err.message)
+                        return reject(err);
+                    } else {
+                        console.log(`📤 Published to "${topic}": ${message}`)
+                        resolve();
+                    }
+                })
+            })
+
+            if (index < datas.schedule.length - 1) {
+                await delay(8000)
+            }
+        }
+
+    } catch (err) {
+        console.log('❌ Server Error:', err);
         if (!res.headersSent) res.status(500).json({ msg: 'Server Error' })
     }
 }
