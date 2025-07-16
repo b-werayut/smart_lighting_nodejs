@@ -498,6 +498,41 @@ exports.setScheduleLight = async (req, res) => {
     }
 }
 
+exports.setAllScheduleMode = async (req, res) => {
+    try {
+
+        const { group } = req.body
+        const topic = `mesh_data/toDevice/${group}`
+        const message = {
+            method: "control_lighting",
+            params: {
+                workmode: "MANUAL",
+                lightmode: "PWM",
+            }
+        }
+
+        if (!client.connected) {
+            console.warn('⚠️ MQTT not connected');
+            return res.status(503).send('MQTT not connected');
+        }
+
+        client.publish(topic, message, { qos: 1, retain: true }, (err) => {
+            if (err) {
+                console.error('❌ Publish error:', err.message)
+                return res.status(503).send(" Publish error:")
+            } else {
+                console.log(`📤 Published to "${topic}": ${message}`)
+                res.json({ status: "Success" })
+            }
+        })
+
+
+    } catch (err) {
+        console.log('❌ Server Error:', err)
+        if (!res.headersSent) res.status(500).json({ msg: 'Server Error' })
+    }
+}
+
 exports.setAllScheduleLight = async (req, res) => {
     try {
         const datas = req.body;
@@ -505,9 +540,9 @@ exports.setAllScheduleLight = async (req, res) => {
 
         if (!Array.isArray(datas?.schedule)) {
             return res.status(400).json({ msg: 'Invalid request format, expected an array' });
-        }else{
+        } else {
             await new Promise(resolve => setTimeout(resolve, 1000));
-            res.json({ status: 'OK', published: datas?.schedule.length })
+            res.json({ status: datas, published: datas?.schedule.length })
         }
 
         if (!group) {
@@ -520,6 +555,24 @@ exports.setAllScheduleLight = async (req, res) => {
         }
 
         const topic = `mesh_data/toDevice/${group}`;
+
+        const messageSetschedule = JSON.stringify({
+            method: "control_lighting",
+            params: {
+                workmode: "SCHEDULE",
+                lightmode: "PWM",
+            }
+        })
+
+        client.publish(topic, messageSetschedule, { qos: 1, retain: true }, (err) => {
+            if (err) {
+                console.error('❌ Publish error:', err.message)
+                return res.status(503).send(" Publish error:")
+            } else {
+                console.log(`📤 Published to "${topic}": ${messageSetschedule}`)
+            }
+        })
+        await new Promise(resolve => setTimeout(resolve, 5000));
 
         for (const [index, items] of datas?.schedule.entries()) {
             const message = JSON.stringify({
