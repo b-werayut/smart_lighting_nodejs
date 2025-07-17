@@ -4,6 +4,7 @@ const { insertDevices } = require('./database_manage')
 
 const mqttserver = process.env.MQTT_SERVER
 const topic56 = "mesh_data/toCloud/56/+"
+const topic66 = "mesh_data/toCloud/66/+"
 const topic255 = "mesh_data/toCloud/255/+"
 const options = {
   username: '',
@@ -21,7 +22,7 @@ const PROCESS_INTERVAL = 5000
 
 client.on('connect', () => {
   console.log('✅ MQTT connected')
-  client.subscribe([topic56,topic255], { qos: 1 }, (err) => {
+  client.subscribe([topic56,topic66,topic255], { qos: 1 }, (err) => {
     if (err) {
       console.error('❌ MQTT Subscribe Error:', err.message)
     } else {

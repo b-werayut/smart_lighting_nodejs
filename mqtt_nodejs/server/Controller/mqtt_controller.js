@@ -595,14 +595,14 @@ exports.setAllScheduleLight = async (req, res) => {
                         console.error('❌ Publish error:', err.message)
                         return reject(err);
                     } else {
-                        console.log(`📤 Published to "${topic}": ${message}`)
+                        console.log(`📤 PublishedSchedule to "${topic}": ${message}`)
                         resolve();
                     }
                 })
             })
 
             if (index < datas.schedule.length - 1) {
-                await delay(8000)
+                await delay(10000)
             }
         }
 
