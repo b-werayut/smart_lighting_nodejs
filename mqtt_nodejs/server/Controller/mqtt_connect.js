@@ -3,9 +3,7 @@ const { v4: uuidv4 } = require('uuid')
 const { insertDevices } = require('./database_manage')
 
 const mqttserver = process.env.MQTT_SERVER
-const topic56 = "mesh_data/toCloud/56/+"
-const topic66 = "mesh_data/toCloud/66/+"
-const topic255 = "mesh_data/toCloud/255/+"
+const topic = ["mesh_data/toCloud/56/+", "mesh_data/toCloud/66/+", "mesh_data/toCloud/255/+", "mesh_data/toCloud/88/+", "mesh_data/toCloud/99/+",]
 const options = {
   username: '',
   password: '',
@@ -22,7 +20,7 @@ const PROCESS_INTERVAL = 5000
 
 client.on('connect', () => {
   console.log('✅ MQTT connected')
-  client.subscribe([topic56,topic66,topic255], { qos: 1 }, (err) => {
+  client.subscribe(topic, { qos: 1 }, (err) => {
     if (err) {
       console.error('❌ MQTT Subscribe Error:', err.message)
     } else {
@@ -66,7 +64,7 @@ client.on('message', async (_, mqttMessage) => {
       pwm2,
     } = data.lighting || {}
 
-    const scheduleListSunday = data.schedule?.sunday?.list
+    const scheduleListSunday = data.schedule?.sunday?.list ?? "No Array Data!"
     const scheduleListMonday = data.schedule?.monday?.list
     const scheduleListTuesday = data.schedule?.tuesday?.list
     const scheduleListWednesday = data.schedule?.wednesday?.list
@@ -95,12 +93,12 @@ client.on('message', async (_, mqttMessage) => {
           relay: String(relay),
           mid: String(mid),
           schListSunday: scheduleListSunday,
-          schListMonday: scheduleListMonday,
-          schListTuesday: scheduleListTuesday,
-          schListWednesday: scheduleListWednesday,
-          schListThursday: scheduleListThursday,
-          schListFriday: scheduleListFriday,
-          schListSaturday: scheduleListSaturday,
+          // schListMonday: scheduleListMonday,
+          // schListTuesday: scheduleListTuesday,
+          // schListWednesday: scheduleListWednesday,
+          // schListThursday: scheduleListThursday,
+          // schListFriday: scheduleListFriday,
+          // schListSaturday: scheduleListSaturday,
         }
 
         messageQueue.push(formattedData)
@@ -121,7 +119,7 @@ setInterval(async () => {
 
   try {
     for (const data of batch) {
-      // console.log('📥 Inserting data:', data)
+      console.log('📥 Inserting data:', data)
       await insertDevices(data) // insert ทีละตัวแบบ รอจนครบก่อน
       // await Promise.all(batch.map(data => insertDevices(data))) // insert พร้อมกันทั้งหมด (ไวกว่า)
     }
