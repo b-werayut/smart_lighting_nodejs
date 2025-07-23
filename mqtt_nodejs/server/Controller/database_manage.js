@@ -385,7 +385,7 @@ exports.insertDevices = async (data) => {
       // console.log('✅ Schedule data upserted (separated by 5 index)');
     }
     return devices;
-    
+
   } catch (err) {
     console.error('❌ insertDevices error:', err)
   }
@@ -463,8 +463,8 @@ exports.getAlldevices = async (req, res) => {
 
 exports.getGroupdevices = async (req, res) => {
   try {
-    const group = String(req.params.group); // แปลงเป็นตัวเลขก่อนเปรียบเทียบ
-    let groupdevices;
+    const group = String(req.params?.group);
+    let groupdevices = [];
 
     if (group === '0') {
       groupdevices = await prisma.Devices.findMany({
@@ -495,7 +495,7 @@ exports.getGroupdevices = async (req, res) => {
       });
     }
 
-    res.json({ groupdevices });
+    res.json(groupdevices);
   } catch (err) {
     console.log(err);
     res.json({ msg: "Error" });
