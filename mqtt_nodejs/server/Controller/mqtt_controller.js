@@ -444,19 +444,39 @@ exports.setScheduleLight = async (req, res) => {
 
         if (!Array.isArray(datas?.schedule)) {
             return res.status(400).json({ msg: 'Invalid request format, expected an array' });
+        } else {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            res.json({ status: datas, published: datas?.schedule.length })
         }
 
-        const macAddress = datas?.macAddress;
-        if (!macAddress) {
+        const macAddress = datas?.macAddress ?? "";
+        if (!macAddress || macAddress === "") {
             return res.status(400).json({ msg: 'Missing macAddress' });
         }
-
-        const topic = `mesh_data/toDevice/56/${macAddress}`
 
         if (!client.connected) {
             console.warn('⚠️ MQTT not connected');
             return res.status(503).send('MQTT not connected');
         }
+
+        const topic = `mesh_data/toDevice/56/${macAddress}`
+        const messageSetschedule = JSON.stringify({
+            method: "control_lighting",
+            params: {
+                workmode: "SCHEDULE",
+                lightmode: "PWM",
+            }
+        })
+
+        client.publish(topic, messageSetschedule, { qos: 1, retain: true }, (err) => {
+            if (err) {
+                console.error('❌ Publish error:', err.message)
+                return res.status(503).send(" Publish error:")
+            } else {
+                console.log(`📤 Published to "${topic}": ${messageSetschedule}`)
+            }
+        })
+        await new Promise(resolve => setTimeout(resolve, 5000));
 
         for (const [index, items] of datas.schedule.entries()) {
             const message = JSON.stringify({
@@ -486,49 +506,12 @@ exports.setScheduleLight = async (req, res) => {
             })
 
             if (index < datas.schedule.length - 1) {
-                await delay(2000)
+                await delay(10000)
             }
         }
-
-        res.json({ status: 'OK', published: datas.schedule.length })
 
     } catch (err) {
         console.log('❌ Server Error:', err);
-        if (!res.headersSent) res.status(500).json({ msg: 'Server Error' })
-    }
-}
-
-exports.setAllScheduleMode = async (req, res) => {
-    try {
-
-        const { group } = req.body
-        const topic = `mesh_data/toDevice/${group}`
-        const message = {
-            method: "control_lighting",
-            params: {
-                workmode: "MANUAL",
-                lightmode: "PWM",
-            }
-        }
-
-        if (!client.connected) {
-            console.warn('⚠️ MQTT not connected');
-            return res.status(503).send('MQTT not connected');
-        }
-
-        client.publish(topic, message, { qos: 1, retain: true }, (err) => {
-            if (err) {
-                console.error('❌ Publish error:', err.message)
-                return res.status(503).send(" Publish error:")
-            } else {
-                console.log(`📤 Published to "${topic}": ${message}`)
-                res.json({ status: "Success" })
-            }
-        })
-
-
-    } catch (err) {
-        console.log('❌ Server Error:', err)
         if (!res.headersSent) res.status(500).json({ msg: 'Server Error' })
     }
 }
@@ -555,7 +538,6 @@ exports.setAllScheduleLight = async (req, res) => {
         }
 
         const topic = `mesh_data/toDevice/${group}`;
-
         const messageSetschedule = JSON.stringify({
             method: "control_lighting",
             params: {
@@ -608,6 +590,41 @@ exports.setAllScheduleLight = async (req, res) => {
 
     } catch (err) {
         console.log('❌ Server Error:', err);
+        if (!res.headersSent) res.status(500).json({ msg: 'Server Error' })
+    }
+}
+
+exports.setAllScheduleMode = async (req, res) => {
+    try {
+
+        const { group } = req.body
+        const topic = `mesh_data/toDevice/${group}`
+        const message = {
+            method: "control_lighting",
+            params: {
+                workmode: "MANUAL",
+                lightmode: "PWM",
+            }
+        }
+
+        if (!client.connected) {
+            console.warn('⚠️ MQTT not connected');
+            return res.status(503).send('MQTT not connected');
+        }
+
+        client.publish(topic, message, { qos: 1, retain: true }, (err) => {
+            if (err) {
+                console.error('❌ Publish error:', err.message)
+                return res.status(503).send(" Publish error:")
+            } else {
+                console.log(`📤 Published to "${topic}": ${message}`)
+                res.json({ status: "Success" })
+            }
+        })
+
+
+    } catch (err) {
+        console.log('❌ Server Error:', err)
         if (!res.headersSent) res.status(500).json({ msg: 'Server Error' })
     }
 }
