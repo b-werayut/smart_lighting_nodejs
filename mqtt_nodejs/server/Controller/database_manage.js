@@ -249,7 +249,8 @@ exports.insertDevices = async (data) => {
       pwm1,
       pwm2,
       mid,
-      schListSunday
+      schListSunday,
+      schactiveSunday,
     } = data
 
     const devices = await prisma.Devices.upsert({
@@ -268,7 +269,6 @@ exports.insertDevices = async (data) => {
         last_time_sync,
         workmode,
         lightmode,
-        relay,
         relay,
         pwm_freq,
         pwm1,
@@ -300,7 +300,6 @@ exports.insertDevices = async (data) => {
         last_time_sync,
         workmode,
         lightmode,
-        relay,
         relay,
         pwm_freq,
         pwm1,

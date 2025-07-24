@@ -483,12 +483,12 @@ exports.setScheduleLight = async (req, res) => {
                 method: "config_schedule_profile",
                 params: {
                     dayofweek: "all",
-                    active: true,
+                    active: items.active ?? false,
                     no: Number(items.no),
-                    start_time: items.starttime,
-                    end_time: items.endtime,
-                    pwm1: Number(items.warmval),
-                    pwm2: Number(items.coolval),
+                    start_time: items.starttime ?? "00:00",
+                    end_time: items.endtime ?? "00:00",
+                    pwm1: isNaN(Number(items.warmval)) ? 0 : Number(items.warmval),
+                    pwm2: isNaN(Number(items.coolval)) ? 0 : Number(items.coolval),
                     lightmode: "PWM"
                 }
             })
@@ -561,12 +561,12 @@ exports.setAllScheduleLight = async (req, res) => {
                 method: "config_schedule_profile",
                 params: {
                     dayofweek: "all",
-                    active: true,
+                    active: items.active ?? false,
                     no: Number(items.no),
-                    start_time: items.starttime,
-                    end_time: items.endtime,
-                    pwm1: Number(items.warmval),
-                    pwm2: Number(items.coolval),
+                    start_time: items.starttime ?? "00:00",
+                    end_time: items.endtime ?? "00:00",
+                    pwm1: isNaN(Number(items.warmval)) ? 0 : Number(items.warmval),
+                    pwm2: isNaN(Number(items.coolval)) ? 0 : Number(items.coolval),
                     lightmode: "PWM"
                 }
             })
