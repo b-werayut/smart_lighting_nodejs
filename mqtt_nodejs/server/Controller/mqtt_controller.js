@@ -112,16 +112,31 @@ exports.turnOffAllLight = async (req, res) => {
 
 exports.turnOnAllLightVal = async (req, res) => {
     try {
-        const { relay, warmVal, coolVal, group } = req.body;
+        const datas = req.body;
+        const { group, relay, warmVal, coolVal } = req.body;
 
-        if (relay === undefined || warmVal === undefined || coolVal === undefined) {
-            return res.status(400).json({ msg: 'Missing required fields' });
+        if (Array.isArray(group)) {
+            const respMultiGroup = ({
+                status: `📤 Turn ${relay} multi group successfully`,
+                group,
+                relay
+            });
+
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            res.json(respMultiGroup);
+            await turnOnAllGroupLightVal(datas);
+            return;
         }
 
+        const respSingleGroup = ({
+            status: `📤 Turn ${relay} single group successfully`,
+            group,
+            relay
+        });
+        res.json(respSingleGroup);
+
         const groupStr = String(group ?? '0');
-        const topic = groupStr === '0'
-            ? 'mesh_data/toDevice/'
-            : `mesh_data/toDevice/${groupStr}`;
+        const topic = `mesh_data/toDevice/${groupStr}`;
 
         const message = JSON.stringify({
             method: 'control_lighting',
@@ -154,6 +169,61 @@ exports.turnOnAllLightVal = async (req, res) => {
         if (!res.headersSent) res.status(500).json({ msg: 'Server Error' });
     }
 }
+
+const turnOnAllGroupLightVal = async (datas) => {
+    try {
+
+        const { group, relay, warmVal, coolVal } = datas;
+
+        if (!Array.isArray(group) || group.length === 0) {
+            console.log('Invalid group format or empty group')
+        }
+
+        console.log('📤 Send multi group')
+
+        if (!client.connected) {
+            console.warn('⚠️ MQTT not connected');
+        }
+
+        for (const [index, item] of group.entries()) {
+            const topic = `mesh_data/toDevice/${item}`;
+
+            const message = JSON.stringify({
+                method: 'control_lighting',
+                params: {
+                    relay: String(relay),
+                    workmode: "MANUAL",
+                    lightmode: 'PWM',
+                    pwm1: Number(warmVal),
+                    pwm2: Number(coolVal),
+                },
+            });
+
+            await new Promise((resolve, reject) => {
+                client.publish(topic, message, { qos: 1, retain: true }, (err) => {
+                    if (err) {
+                        console.error('❌ Publish error:', err.message);
+                        return reject(err);
+                    } else {
+                        console.log(`📤 Published to "${topic}": ${message}`);
+                        resolve();
+                    }
+                });
+            });
+
+            if (index < group.length - 1) {
+                    await delay(10000)
+                }
+
+        }
+
+    } catch (err) {
+        console.error('❌ Server Error:', err);
+        if (!res.headersSent) {
+            res.status(500).json({ msg: 'Server Error' });
+        }
+    }
+};
 
 exports.turnOnLightVal = async (req, res) => {
     try {
@@ -452,8 +522,14 @@ exports.setScheduleLight = async (req, res) => {
         }
 
         const macAddress = datas?.macAddress ?? "";
+        const group = datas?.group ?? "";
+
         if (!macAddress || macAddress === "") {
             return res.status(400).json({ msg: 'Missing macAddress' });
+        }
+
+        if (!group || group === "") {
+            return res.status(400).json({ msg: 'Missing group' });
         }
 
         if (!client.connected) {
@@ -461,7 +537,7 @@ exports.setScheduleLight = async (req, res) => {
             return res.status(503).send('MQTT not connected');
         }
 
-        const topic = `mesh_data/toDevice/56/${macAddress}`
+        const topic = `mesh_data/toDevice/${group}/${macAddress}`
         const messageSetschedule = JSON.stringify({
             method: "control_lighting",
             params: {
@@ -528,25 +604,26 @@ exports.setAllScheduleLight = async (req, res) => {
             const respMutiGroup = ({
                 status: '📤 Send multi group successfully',
                 group,
-                scheduleCount: datas.schedule.length
+                scheduleCount: datas?.schedule.length
             });
 
             await new Promise(resolve => setTimeout(resolve, 1000));
-            res.json(respMutiGroup)
-            await setAllGroupScheduleLight(datas)
-            return
+            res.json(respMutiGroup);
+            await setAllGroupScheduleLight(datas);
+            return;
         }
 
         const respSingleGroup = ({
             status: '📤 Send single group successfully',
             group,
-            scheduleCount: datas.schedule.length
+            scheduleCount: datas?.schedule.length
         });
 
         console.log('📤 Send single group')
 
         if (!Array.isArray(datas?.schedule)) {
-            return res.status(400).json({ msg: 'Invalid request format, expected an array' });
+            console.log('Invalid schedule format, expected an array');
+            return res.status(400).json({ msg: 'Invalid schedule format, expected an array' });
         } else {
             await new Promise(resolve => setTimeout(resolve, 1000));
             res.json(respSingleGroup)
@@ -607,7 +684,7 @@ exports.setAllScheduleLight = async (req, res) => {
                 })
             })
 
-            if (index < datas.schedule.length - 1) {
+            if (index < datas?.schedule.length - 1) {
                 await delay(10000)
             }
         }
@@ -660,7 +737,7 @@ const setAllGroupScheduleLight = async (datas) => {
 
             await new Promise(resolve => setTimeout(resolve, 5000));
 
-            for (const [index, item] of datas.schedule.entries()) {
+            for (const [index, item] of datas?.schedule.entries()) {
                 const scheduleMessage = JSON.stringify({
                     method: "config_schedule_profile",
                     params: {
@@ -687,7 +764,7 @@ const setAllGroupScheduleLight = async (datas) => {
                     });
                 });
 
-                if (index < datas.schedule.length - 1) {
+                if (index < datas?.schedule.length - 1) {
                     await delay(10000)
                 }
             }
