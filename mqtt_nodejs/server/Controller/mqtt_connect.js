@@ -2,6 +2,7 @@ const mqtt = require('mqtt')
 const { v4: uuidv4 } = require('uuid')
 const { insertDevices } = require('./database_manage')
 
+
 const mqttserver = process.env.MQTT_SERVER
 const topic = ["mesh_data/toCloud/56/+", "mesh_data/toCloud/66/+", "mesh_data/toCloud/255/+", "mesh_data/toCloud/88/+", "mesh_data/toCloud/99/+",]
 const options = {
@@ -120,8 +121,8 @@ setInterval(async () => {
   try {
     for (const data of batch) {
       // console.log('📥 Inserting :', data)
-      await insertDevices(data) // insert ทีละตัวแบบ รอจนครบก่อน
-      // await Promise.all(batch.map(data => insertDevices(data))) // insert พร้อมกันทั้งหมด (ไวกว่า)
+      //await insertDevices(data) // insert ทีละตัวแบบ รอจนครบก่อน
+      await Promise.all(batch.map(data => insertDevices(data))) // insert พร้อมกันทั้งหมด (ไวกว่า)
     }
     console.log(`✅ Inserted (${batch.length}) Devices Datas`)
   } catch (err) {
