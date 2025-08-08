@@ -133,6 +133,8 @@ exports.turnOnAllLightVal = async (req, res) => {
             group,
             relay
         });
+        
+        await new Promise(resolve => setTimeout(resolve, 1000));
         res.json(respSingleGroup);
 
         const groupStr = String(group ?? '0');
