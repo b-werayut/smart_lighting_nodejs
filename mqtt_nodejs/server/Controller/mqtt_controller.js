@@ -520,19 +520,36 @@ exports.setScheduleLight = async (req, res) => {
 
 exports.setAllScheduleLight = async (req, res) => {
     try {
+
         const datas = req.body;
         const group = datas?.group;
 
         if (Array.isArray(group)) {
-            setAllGroupScheduleLight(datas)
+            const respMutiGroup = ({
+                status: '📤 Send multi group successfully',
+                group,
+                scheduleCount: datas.schedule.length
+            });
+
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            res.json(respMutiGroup)
+            await setAllGroupScheduleLight(datas)
             return
         }
+
+        const respSingleGroup = ({
+            status: '📤 Send single group successfully',
+            group,
+            scheduleCount: datas.schedule.length
+        });
+
+        console.log('📤 Send single group')
 
         if (!Array.isArray(datas?.schedule)) {
             return res.status(400).json({ msg: 'Invalid request format, expected an array' });
         } else {
             await new Promise(resolve => setTimeout(resolve, 1000));
-            res.json({ status: datas, schedule: datas?.schedule.length })
+            res.json(respSingleGroup)
         }
 
         if (!group) {
@@ -601,24 +618,21 @@ exports.setAllScheduleLight = async (req, res) => {
     }
 }
 
-exports.setAllGroupScheduleLight = async (req, res) => {
+const setAllGroupScheduleLight = async (datas) => {
     try {
-        const datas = req.body;
+
         const group = datas?.group;
 
         if (!Array.isArray(group) || group.length === 0) {
-            return res.status(400).json({ msg: 'Invalid group format or empty group' });
-        } else {
-            res.json({
-                msg: 'Schedules sent successfully',
-                groupCount: group.length,
-                scheduleCount: datas.schedule.length
-            });
+            console.log('Invalid group format or empty group')
+            return ({ msg: 'Invalid group format or empty group' });
         }
+
+        console.log('📤 Send multi group')
 
         if (!client.connected) {
             console.warn('⚠️ MQTT not connected');
-            return res.status(503).send('MQTT not connected');
+            return ('MQTT not connected');
         }
 
         for (const groupDeveices of group) {
@@ -674,7 +688,7 @@ exports.setAllGroupScheduleLight = async (req, res) => {
                 });
 
                 if (index < datas.schedule.length - 1) {
-                    await new Promise(resolve => setTimeout(resolve, 10000));
+                    await delay(10000)
                 }
             }
         }

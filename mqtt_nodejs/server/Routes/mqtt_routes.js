@@ -13,7 +13,7 @@ router.post("/updatemode/", updateModeMqtt)
 router.post("/setschedule", setScheduleLight)
 router.post("/setallscheduleMode", setAllScheduleMode)
 router.post("/setallschedule", setAllScheduleLight)
-router.post("/setallgroupschedule", setAllGroupScheduleLight)
+// router.post("/setallgroupschedule", setAllGroupScheduleLight)
 
 router.get('/getLampTime', getLampTime)
 router.get('/getalldevices', getAlldevices)

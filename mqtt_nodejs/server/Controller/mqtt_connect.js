@@ -119,7 +119,7 @@ setInterval(async () => {
 
   try {
     for (const data of batch) {
-      console.log('📥 Inserting :', data)
+      // console.log('📥 Inserting :', data)
       await insertDevices(data) // insert ทีละตัวแบบ รอจนครบก่อน
       // await Promise.all(batch.map(data => insertDevices(data))) // insert พร้อมกันทั้งหมด (ไวกว่า)
     }
