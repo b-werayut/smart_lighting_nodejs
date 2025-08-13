@@ -133,7 +133,7 @@ exports.turnOnAllLightVal = async (req, res) => {
             group,
             relay
         });
-        
+
         await new Promise(resolve => setTimeout(resolve, 1000));
         res.json(respSingleGroup);
 
@@ -214,8 +214,8 @@ const turnOnAllGroupLightVal = async (datas) => {
             });
 
             if (index < group.length - 1) {
-                    await delay(10000)
-                }
+                await delay(5000)
+            }
 
         }
 
@@ -543,6 +543,7 @@ exports.setScheduleLight = async (req, res) => {
         const messageSetschedule = JSON.stringify({
             method: "control_lighting",
             params: {
+                relay: "ON",
                 workmode: "SCHEDULE",
                 lightmode: "PWM",
             }
@@ -556,7 +557,8 @@ exports.setScheduleLight = async (req, res) => {
                 console.log(`📤 Published to "${topic}": ${messageSetschedule}`)
             }
         })
-        await new Promise(resolve => setTimeout(resolve, 5000));
+
+        await new Promise(resolve => setTimeout(resolve, 10000));
 
         for (const [index, items] of datas.schedule.entries()) {
             const message = JSON.stringify({
@@ -644,6 +646,7 @@ exports.setAllScheduleLight = async (req, res) => {
         const messageSetschedule = JSON.stringify({
             method: "control_lighting",
             params: {
+                relay: "ON",
                 workmode: "SCHEDULE",
                 lightmode: "PWM",
             }
@@ -657,7 +660,7 @@ exports.setAllScheduleLight = async (req, res) => {
                 console.log(`📤 Published to "${topic}": ${messageSetschedule}`)
             }
         })
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        await new Promise(resolve => setTimeout(resolve, 10000));
 
         for (const [index, items] of datas?.schedule.entries()) {
             const message = JSON.stringify({
@@ -720,24 +723,22 @@ const setAllGroupScheduleLight = async (datas) => {
             const messageSetschedule = JSON.stringify({
                 method: "control_lighting",
                 params: {
+                    relay: "ON",
                     workmode: "SCHEDULE",
                     lightmode: "PWM"
                 }
             });
 
-            await new Promise((resolve, reject) => {
-                client.publish(topic, messageSetschedule, { qos: 1, retain: true }, (err) => {
-                    if (err) {
-                        console.error('❌ Publish error:', err.message);
-                        return reject(err);
-                    } else {
-                        console.log(`📤 Published to "${topic}": ${messageSetschedule}`);
-                        resolve();
-                    }
-                });
-            });
+            client.publish(topic, messageSetschedule, { qos: 1, retain: true }, (err) => {
+                if (err) {
+                    console.error('❌ Publish error:', err.message)
+                    return res.status(503).send(" Publish error:")
+                } else {
+                    console.log(`📤 Published to "${topic}": ${messageSetschedule}`)
+                }
+            })
 
-            await new Promise(resolve => setTimeout(resolve, 5000));
+            await new Promise(resolve => setTimeout(resolve, 10000));
 
             for (const [index, item] of datas?.schedule.entries()) {
                 const scheduleMessage = JSON.stringify({
