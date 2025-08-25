@@ -229,12 +229,12 @@ const turnOnAllGroupLightVal = async (datas) => {
 
 exports.turnOnLightVal = async (req, res) => {
     try {
-        const { macAddress, relay, warmVal, coolVal } = req.body
+        const { group, macAddress, relay, warmVal, coolVal } = req.body
         if (!macAddress) {
             return res.status(400).json({ msg: 'macAddress is required' })
         }
 
-        const topic = `mesh_data/toDevice/56/${macAddress}`
+        const topic = `mesh_data/toDevice/${group}/${macAddress}`
         const message = JSON.stringify(
             {
                 method: 'control_lighting',
@@ -818,12 +818,12 @@ exports.setAllScheduleMode = async (req, res) => {
 
 exports.updateModeMqtt = async (req, res) => {
     try {
-        const { macAddress, mode } = req.body
+        const { group, macAddress, mode } = req.body
         if (!macAddress) {
             return res.status(400).json({ msg: 'macAddress is required' })
         }
 
-        const topic = `mesh_data/toDevice/56/${macAddress}`
+        const topic = `mesh_data/toDevice/${group}/${macAddress}`
         const message = JSON.stringify({
             method: 'control_lighting',
             params: {
