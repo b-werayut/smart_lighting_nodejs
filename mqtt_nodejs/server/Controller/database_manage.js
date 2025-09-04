@@ -459,6 +459,32 @@ exports.getAlldevices = async (req, res) => {
   }
 }
 
+exports.getUserRole = async (req, res) => {
+  try {
+    const { username } = req.body;
+    let resp;
+
+    const role = await prisma.TMstMUser.findFirst({
+      where: {
+        XVUsrCode: String(username)
+      }
+    });
+
+    if (!role || role.length === 0) {
+      resp = 'user does not exist!';
+    } else {
+      resp = role;
+    }
+
+    // console.log('username>>', resp);
+    res.send(resp);
+  } catch (err) {
+    console.log(err);
+    res.json({ msg: "Error" });
+  }
+}
+
+
 exports.getGroupdevices = async (req, res) => {
   try {
     const group = String(req.params?.group);
