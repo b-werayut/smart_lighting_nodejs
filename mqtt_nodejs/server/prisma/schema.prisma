@@ -48,7 +48,7 @@ model TDocTJob {
   XVJobDocStatus   String?   @db.NVarChar(1)
   XVCstCode        String?   @db.NVarChar(20)
   XVPrjCode        String?   @db.NVarChar(20)
-  XVCtlCode        String?   @db.NVarChar(20)
+  XVCtlCode        String?   @db.NVarChar(100)
   XVLmpCode        String?   @db.NVarChar(20)
   XVJobProblem     String?   @db.NVarChar(500)
   XVJobLocation    String?   @db.NVarChar(100)
@@ -63,7 +63,7 @@ model TDocTJob {
 }
 
 model TMstMController {
-  XVCtlCode        String    @id(map: "PK_TMstMController") @db.NVarChar(20)
+  XVCtlCode        String    @id(map: "PK_TMstMController") @db.NVarChar(100)
   XVCtlName        String?   @db.NVarChar(100)
   XVCtlDescription String?   @db.NVarChar(300)
   XVCtlSN          String?   @db.NVarChar(50)
@@ -102,7 +102,7 @@ model TMstMLamp {
   XVLmpName        String?   @db.NVarChar(100)
   XVLmpDescription String?   @db.NVarChar(300)
   XVLmpSN          String?   @db.NVarChar(50)
-  XVCtlCode        String    @db.NVarChar(20)
+  XVCtlCode        String    @db.NVarChar(100)
   XVLmpLat         String?   @db.NVarChar(20)
   XVLmpLong        String?   @db.NVarChar(20)
   XBLmpIsWarning   Boolean?
@@ -311,6 +311,7 @@ model Devices {
   schActive5     String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+  current Float?
 }
 
 model sysdiagrams {

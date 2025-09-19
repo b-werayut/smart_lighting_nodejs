@@ -249,6 +249,7 @@ exports.insertDevices = async (data) => {
       pwm1,
       pwm2,
       mid,
+      current,
       schListSunday,
     } = data
 
@@ -273,6 +274,7 @@ exports.insertDevices = async (data) => {
         pwm1,
         pwm2,
         mid,
+        current,
         schPwm11: Number(0),
         schPwm21: Number(0),
         schPwm12: Number(0),
@@ -304,6 +306,7 @@ exports.insertDevices = async (data) => {
         pwm1,
         pwm2,
         mid,
+        current,
         schStartTime1: "00:00",
         schStartTime2: "00:00",
         schStartTime3: "00:00",
@@ -355,6 +358,7 @@ exports.insertDevices = async (data) => {
         pwm1,
         pwm2,
         mid,
+        current
       };
 
       for (let i = 0; i < Math.min(5, schListSunday.length); i++) {

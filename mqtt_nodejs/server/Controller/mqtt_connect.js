@@ -54,7 +54,7 @@ client.on('message', async (_, mqttMessage) => {
       uptime,
       last_time_sync,
       mid
-    } = data.mesh
+    } = data.mesh || {}
 
     const {
       workmode,
@@ -64,6 +64,10 @@ client.on('message', async (_, mqttMessage) => {
       pwm1,
       pwm2,
     } = data.lighting || {}
+
+    const {
+      current
+    } = data.sensor || {}
 
     const scheduleListSunday = data.schedule?.sunday?.list ?? "No Array Data!"
     const scheduleListMonday = data.schedule?.monday?.list
@@ -93,6 +97,7 @@ client.on('message', async (_, mqttMessage) => {
           lightmode: String(lightmode),
           relay: String(relay),
           mid: String(mid),
+          current,
           schListSunday: scheduleListSunday,
           // schListMonday: scheduleListMonday,
           // schListTuesday: scheduleListTuesday,
@@ -120,11 +125,11 @@ setInterval(async () => {
 
   try {
     for (const data of batch) {
-      // console.log('📥 Inserting :', data)
+      console.log('📥 Inserting :', data)
       //await insertDevices(data) // insert ทีละตัวแบบ รอจนครบก่อน
       await Promise.all(batch.map(data => insertDevices(data))) // insert พร้อมกันทั้งหมด (ไวกว่า)
     }
-    console.log(`✅ Inserted (${batch.length}) Devices Datas`)
+    // console.log(`✅ Inserted (${batch.length}) Devices Datas`)
   } catch (err) {
     console.error('❌ DB Insert Error:', err.message)
   }
